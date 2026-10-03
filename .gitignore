@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# env & secrets — never commit tokens
+.env
+.env.local
+.env.*.local
+*.pem
+
+# test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# sanity
+.sanity/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# NOTE: ingest/data/raw/ is intentionally NOT ignored — the specs require
+# data snapshots (with retrieval date + sha256) to be committed so
+# evaluations reproduce. Route files >50 MB to GitHub release assets
+# and commit only the checksum manifest.
