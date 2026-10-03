@@ -3,10 +3,16 @@
   "private": true,
   "type": "module",
   "description": "discover_resolutions.ts and raw sync snapshots (data/raw) with SHA-256 checksums",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc -p .",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "discover": "node --env-file-if-exists=../.env.local discover_resolutions.ts",
+    "seed:mappings": "node --env-file-if-exists=../.env.local seed_mappings.ts"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@pothole/sync": "workspace:*"
+  }
 }

@@ -191,3 +191,112 @@ document counts and sync time are the real limits).
   Possibly a pnpm 12 reporting quirk; noted, not chased.
 - **Deliberately not done yet:** schemas, sync, pages, workflow definitions. `/app` has only its deps.
   It will be regenerated from `sanity init --template app-quickstart` once `SANITY_ORG_ID` is set.
+
+---
+
+## 2026-10-04 — Session 2: schema, mappings, first real sync
+
+### Prompt
+
+> Credentials complete … You are unblocked: schema, sanity schema deploy, then the 311 sync.
+> Document IDs must NOT contain dots (Sanity hides them from anonymous readers; best-track hit this).
+> Verify the Workflows package names before installing.
+
+The Workflows packages were re-checked on the registry and are unchanged at 0.36.0 (engine, cli, blueprint).
+
+### Decisions made with the project owner (2026-10-04)
+
+| Question | Decision | Why |
+| --- | --- | --- |
+| Scope (spec: Queens, 180 days + all open, cap 3,000) | **Queens Community Board 13, in full**: every complaint from the last 180 days plus every one still open | The borough has ~25,800 in that scope. One board fits under the cap with **nothing sampled or dropped**, so every pet is traceable and clustering sees complete data. |
+| Sanity plan | Growth (50,000 documents) | Free allows 10,000 (Sanity technical-limits page), and complaints + pets + events would get close. |
+| DOT-internal referrals (Inspections, Arterial, Maintenance, Bridge) | **Transferred** | Owner's call. **But see below:** in CB 13 none of these are on a closed ticket. |
+| Highway and bridge potholes | Excluded (the spec says street potholes) | Default; not asked again. |
+
+### Things the spec had wrong or didn't anticipate
+
+- **Dotted IDs.** The spec says `complaint311.<unique_key>`, but every ID here uses hyphens: `complaint311-<key>`, `pothole-<key>`,
+  `statusEvent-…`, `syncRun-…`, `resolutionMapping-…`. Confirmed in this dataset: the 12 system docs
+  (`_.groups.*`) are all dotted and all invisible to an anonymous query. After the sync, an anonymous query sees
+  every complaint, pet, event, mapping and run. A test asserts that no ID contains a dot.
+- **Referrals are never closed.** The discovery run showed that all 467 "referred …" texts in CB 13 sit on
+  `Pending` (or `Open`) complaints. Under the spec's own rule, non-closed complaints are In the shelter or Feral by age,
+  so the owner's "Transferred" mappings exist but match nothing today. The status rule stays in charge;
+  a mapping does not override a ticket the city still lists as open.
+- **"Status not available online" (510 rows).** 505 are Pending and 5 are Closed. Those 5 are the whole **Unmapped** bucket:
+  the text has no information, so the honest move is to show it unmapped, not guess.
+- **Pending complaints that say "repaired" (1) or "duplicate" (1).** The text and status disagree. Status wins (still open).
+- **Old ferals dominate.** Outcome distribution: **963 feral vs 14 in the shelter**. CB 13 has 831
+  complaints still Pending from 2021–2026. The 60-day rule is the spec's; the data makes the Feral wing huge.
+  This is the city's real backlog, not something the code invented.
+- **Median days to close is misleading.** It's 0.4 days overall, because **366 duplicates closed within one minute** of filing
+  (automatic duplicate closure). By resolution: repaired **0.9 days** (n=653), found fixed 1.0 (15),
+  not found 0.5 (408), duplicate 0.0 (445). The post should quote the repaired median, which is worth celebrating.
+- **Time zones.** 311 dates are Socrata floating timestamps (no zone). I read them as New York wall-clock
+  time and convert to UTC in one place (`sync/src/time.ts`), with DST tests. This is an *assumption*.
+  It's consistent with the data (a 19:02 close time pairs with a 01:39Z load the next day), but the dataset page doesn't state it.
+
+### Schema (deployed with `sanity schema deploy`, experimental in sanity 6.17.0)
+
+- `complaint311.raw` is the Socrata row exactly as received, minus system fields like `:updated_at`, which
+  sits beside it as `sourceUpdatedAt`. The whole doc is read-only in the Studio. `rawHash` = SHA-256 of canonical JSON.
+- `pothole` holds only derived fields: name, slug, temperament, outcome, bio + provenance, refs, place,
+  rounded geopoint, `hasCoordinates`. Nothing is copied back onto complaints. Outcome is read-only.
+- `resolutionMapping`, `clusterDecision`, `statusEvent` (cause = complaint ref + the field that changed, with
+  old/new values; kinds `complaintChange`, `timeRule`, `mappingChange`), `adoption`, `syncRun`.
+- Desk structure: pets by outcome, lost strays, staff queues, the read-only city record, events, runs.
+  The Studio hides create/delete for sync-owned types, but that is cosmetic. Server-side checks will enforce it (next session).
+- The project ID is hardcoded in the Studio config. It is public by design, and the Studio bundle can't read
+  non-`SANITY_STUDIO_` env vars.
+- The Deploy Studio token can deploy schemas but **cannot read datasets or CORS** (401, missing grants).
+  CORS origins need the owner or a broader token.
+
+### Resolution discovery → mappings (spec order respected)
+
+`pnpm --filter @pothole/ingest discover` → snapshot `discovery-20261003T202235Z` (3 pages, SHA-256 in
+the manifest), 2,503 complaints, **11 distinct texts**, written to `ingest/data/resolutions.json`.
+There are 8 `resolutionMapping` docs, all exact matches, each with a rationale citing the counts. 3 texts are left unmapped
+on purpose (no information, or "will schedule / rescheduled"). A test checks that every real text is either
+mapped or on that deliberate list, so new city wording can't slip through silently.
+
+### The sync
+
+- `sync/src/plan.ts` is pure: (stored state, fetched rows, clock) → exact writes. Raw records are written only when
+  the hash changes. Every pet is recomputed each run (the 60-day rule needs that). Status events have IDs
+  derived from *what happened*, never from the run, so retries can't duplicate them. A model-restyled bio survives
+  until the facts under it change.
+- Incremental mode filters on `:updated_at >= watermark` **without** the window/open clause. A known
+  complaint that just closed no longer matches `status != 'Closed'`, and the sync must still see it close.
+- Each fetched page is saved verbatim to `ingest/data/raw/<runId>/page-NNNN.json`, with a manifest recording
+  the retrieval time and SHA-256.
+- Runs as plain Node 24 TypeScript (type stripping, `.ts` import extensions), with no build step and no `tsx`.
+
+### Measured (live, 2026-10-03 20:28 UTC, CB 13)
+
+| Measure | Value |
+| --- | --- |
+| Complaints synced | **2,503** (first full run: 1 min 59 s) |
+| Status events | 4,992 (rebuilt history: reported → shelter → [feral] → outcome) |
+| Outcomes | adopted 668 · ghost 408 · transferred 445 · feral 963 · shelter 14 · unmapped 5 |
+| Lost strays (no coordinates) | **1,552 of 2,503 (62%)** |
+| Unmapped phrases | 1 distinct ("status … not available online"), 5 complaints |
+| Median days to close | 0.9 for repairs; 0.4 overall (skewed by instant duplicate closures) |
+| **Second sync** | incremental: fetched 4, **0 created / 0 updated / 0 events**; forced full: fetched 2,503, **0 / 0 / 0**; documents touched after run 1: **0** |
+| Tests | **31 passing** (sync 28, ingest 3) |
+
+### Where it got stuck
+
+- **Multi-file shell heredocs failed twice** ("unexpected EOF while looking for matching quote"): once when writing
+  8 schema files, and again when appending this very log entry. Quote characters inside the content broke the shell
+  parse. Fixed by writing files with the editor tool. Lesson: don't pack source or prose into one shell command.
+- **The idempotency test caught a real bug.** Two runs in the same second got the same `syncRun-<timestamp>` ID,
+  so the second run's "running" doc overwrote the first's success record, lost the watermark, and silently
+  fell back to a full fetch. Fixed with a random suffix on run IDs (nothing derived depends on them).
+  This can happen in practice when a manual run overlaps the scheduled one.
+
+### Not done yet
+
+- Clustering (60 m / 30 days, same street) and `clusterDecision` proposals. Today every complaint is its own pet.
+- The scheduler (GitHub Actions, hourly), and committing snapshots from CI. A full run adds ~2.3 MB of
+  snapshot; incremental runs add a few KB.
+- Server-side enforcement that only the sync token changes outcomes; the bio fact guard; the model restyle.

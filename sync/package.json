@@ -3,10 +3,16 @@
   "private": true,
   "type": "module",
   "description": "SODA client, upsert, clustering, outcome mapping, status events, syncRun",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts",
+    "./domain": "./src/domain.ts"
+  },
   "scripts": {
     "typecheck": "tsc -p .",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "sync": "node --env-file-if-exists=../.env.local src/cli.ts"
   },
-  "dependencies": { "@sanity/client": "^8.9.0" }
+  "dependencies": {
+    "@sanity/client": "^8.9.0"
+  }
 }

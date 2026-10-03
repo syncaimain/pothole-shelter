@@ -1,0 +1,3 @@
+# Raw 311 snapshots are hashed byte for byte (SHA-256 in each manifest).
+# Never let git rewrite their line endings, or the checksums stop matching.
+ingest/data/raw/** -text

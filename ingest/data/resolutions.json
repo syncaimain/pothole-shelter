@@ -1,0 +1,149 @@
+{
+  "retrievedAt": "2026-10-03T20:22:35.879Z",
+  "scope": {
+    "complaintType": "Street Condition",
+    "descriptor": "Pothole",
+    "borough": "QUEENS",
+    "communityBoard": "13 QUEENS",
+    "windowDays": 180
+  },
+  "where": "complaint_type='Street Condition' AND descriptor='Pothole' AND borough='QUEENS' AND community_board='13 QUEENS' AND (created_date > '2026-04-06T20:22:35' OR status != 'Closed')",
+  "rows": 2503,
+  "snapshot": "discovery-20261003T202235Z",
+  "distinctPhrases": 11,
+  "phrases": [
+    {
+      "text": "The Department of Transportation inspected this complaint and repaired the problem.",
+      "total": 654,
+      "byStatus": {
+        "Pending": 1,
+        "Closed": 653
+      },
+      "exampleKeys": [
+        "65056878",
+        "68586106",
+        "68586622"
+      ]
+    },
+    {
+      "text": "The status of this Service Request is currently not available online. Please call 311 for further assistance. If you are outside of New York City, please call (212) NEW-YORK (212-639-9675).",
+      "total": 510,
+      "byStatus": {
+        "Pending": 505,
+        "Closed": 5
+      },
+      "exampleKeys": [
+        "49524115",
+        "49872816",
+        "49874344"
+      ]
+    },
+    {
+      "text": "The Department of Transportation determined that this complaint is a duplicate of a previously filed complaint. The original complaint is being addressed.",
+      "total": 446,
+      "byStatus": {
+        "Pending": 1,
+        "Closed": 445
+      },
+      "exampleKeys": [
+        "68467729",
+        "68578870",
+        "68586102"
+      ]
+    },
+    {
+      "text": "The Department of Transportation inspected this complaint and did not find the reported problem.",
+      "total": 408,
+      "byStatus": {
+        "Closed": 408
+      },
+      "exampleKeys": [
+        "68587982",
+        "68589432",
+        "68596389"
+      ]
+    },
+    {
+      "text": "The Department of Transportation referred this complaint to the Inspections Unit for further action.",
+      "total": 235,
+      "byStatus": {
+        "Pending": 235
+      },
+      "exampleKeys": [
+        "49726735",
+        "49912416",
+        "54357658"
+      ]
+    },
+    {
+      "text": "The Department of Transportation inspected this complaint and referred it to the Arterial Division for further action.",
+      "total": 122,
+      "byStatus": {
+        "Pending": 122
+      },
+      "exampleKeys": [
+        "56515830",
+        "56527918",
+        "59806794"
+      ]
+    },
+    {
+      "text": "The Department of Transportation referred this complaint to the appropriate Maintenance Unit for repair.",
+      "total": 71,
+      "byStatus": {
+        "Pending": 4,
+        "Open": 67
+      },
+      "exampleKeys": [
+        "55531920",
+        "55805445",
+        "56017425"
+      ]
+    },
+    {
+      "text": "The Department of Transportation inspected this complaint and referred it to the Bridge Division for further action.",
+      "total": 39,
+      "byStatus": {
+        "Pending": 39
+      },
+      "exampleKeys": [
+        "65075503",
+        "65083343",
+        "65083334"
+      ]
+    },
+    {
+      "text": "The Department of Transportation inspected this complaint and found that the problem was fixed.",
+      "total": 15,
+      "byStatus": {
+        "Closed": 15
+      },
+      "exampleKeys": [
+        "68592195",
+        "68714553",
+        "68862897"
+      ]
+    },
+    {
+      "text": "The Department of Transportation inspected this complaint and will schedule the repair.",
+      "total": 2,
+      "byStatus": {
+        "Pending": 2
+      },
+      "exampleKeys": [
+        "54076740",
+        "62354674"
+      ]
+    },
+    {
+      "text": "The Department of Transportation inspected this complaint and found that the defect was not accessible. The repair will be rescheduled.",
+      "total": 1,
+      "byStatus": {
+        "Pending": 1
+      },
+      "exampleKeys": [
+        "61236253"
+      ]
+    }
+  ]
+}

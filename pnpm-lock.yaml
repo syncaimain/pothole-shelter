@@ -207,10 +207,17 @@ importers:
         specifier: ^19
         version: 19.3.0
 
-  ingest: {}
+  ingest:
+    dependencies:
+      '@pothole/sync':
+        specifier: workspace:*
+        version: link:../sync
 
   studio:
     dependencies:
+      '@pothole/sync':
+        specifier: workspace:*
+        version: link:../sync
       react:
         specifier: ^19.2.2
         version: 19.3.0
