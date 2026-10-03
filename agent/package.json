@@ -1,0 +1,12 @@
+{
+  "name": "@pothole/agent",
+  "private": true,
+  "type": "module",
+  "description": "Bio writer and cluster proposer (Gemini via the AI SDK) with the fact guard",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": { "ai": "^7.0.127", "@ai-sdk/google": "^4.0.87", "@ai-sdk/mcp": "^2.0.66" }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@pothole/studio",
+  "private": true,
+  "type": "module",
+  "description": "Sanity Studio: schemas, read-only outcome rules, desk structure",
+  "scripts": {
+    "dev": "sanity dev --port 3337",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "schema:deploy": "sanity schema deploy",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2",
+    "sanity": "6.17.0",
+    "styled-components": "^6.4.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19"
+  }
+}

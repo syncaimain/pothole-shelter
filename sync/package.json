@@ -1,0 +1,12 @@
+{
+  "name": "@pothole/sync",
+  "private": true,
+  "type": "module",
+  "description": "SODA client, upsert, clustering, outcome mapping, status events, syncRun",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": { "@sanity/client": "^8.9.0" }
+}

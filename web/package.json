@@ -1,0 +1,22 @@
+{
+  "name": "@pothole/web",
+  "private": true,
+  "type": "module",
+  "description": "Next.js public site + API routes (adoption form, read-only proxies)",
+  "scripts": {
+    "dev": "next dev --port 3004",
+    "build": "next build",
+    "start": "next start --port 3004",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@sanity/client": "^8.9.0",
+    "next": "16.3.8",
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
+  }
+}

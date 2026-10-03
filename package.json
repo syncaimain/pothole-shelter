@@ -1,0 +1,21 @@
+{
+  "name": "pothole-shelter",
+  "private": true,
+  "description": "Pothole Adoption Agency — NYC 311 pothole complaints (Queens) as adoptable pets. Sanity Challenge, Path Two.",
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @pothole/web dev",
+    "dev:studio": "pnpm --filter @pothole/studio dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "6.0.3",
+    "vitest": "^5.0.3"
+  }
+}

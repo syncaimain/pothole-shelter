@@ -1,0 +1,12 @@
+{
+  "name": "@pothole/ingest",
+  "private": true,
+  "type": "module",
+  "description": "discover_resolutions.ts and raw sync snapshots (data/raw) with SHA-256 checksums",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {}
+}

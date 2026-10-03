@@ -1,0 +1,18 @@
+{
+  "name": "@pothole/app",
+  "private": true,
+  "type": "module",
+  "description": "App SDK Shelter Office (logged-in staff). Scaffolded from the app-quickstart template once SANITY_ORG_ID is set.",
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@sanity/sdk": "3.7.0",
+    "@sanity/sdk-react": "3.7.0",
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19"
+  }
+}

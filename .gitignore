@@ -34,3 +34,6 @@ Thumbs.db
 # data snapshots (with retrieval date + sha256) to be committed so
 # evaluations reproduce. Route files >50 MB to GitHub release assets
 # and commit only the checksum manifest.
+
+# typescript incremental build info
+*.tsbuildinfo
