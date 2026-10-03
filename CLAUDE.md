@@ -53,3 +53,46 @@ Celebrate repairs. **Never mock residents or road crews.** The joke is the shelt
 ## Hosting note
 
 The spec wants an hourly sync. Check your Vercel plan cron frequency limits before committing to hourly — the free hobby tier is restricted. Record what you find and fall back to the best allowed interval rather than silently shipping a sync that never fires.
+
+## Model provider — Google Gemini
+
+This build uses Gemini, not Anthropic. The key is `GEMINI_API_KEY` in `.env.local`, loaded for you by `launch.ps1`.
+
+- **Prefer the Vercel AI SDK over a provider-specific SDK.** The spec requires an MCP client to reach the Sanity Context endpoint, and the AI SDK gives you Gemini models plus MCP tool discovery in one place. Discover tools with MCP `tools/list` at runtime; never hardcode tool schemas.
+- **Record the exact model name and version in every evaluation result**, as the spec requires. All arms of the evaluation must use the same model.
+- **Verify** the current Gemini model IDs and the AI SDK provider package name against live docs before coding. Do not rely on remembered model names.
+- The key format supplied does not match the usual Google AI Studio pattern, so make a single cheap call to confirm it authenticates before building anything on top of it. If it fails, stop and report rather than working around it.
+
+## Findings from a sibling agent — re-verify cheaply, then rely on them
+
+The `best-track` agent verified these against live Sanity docs on 2026-10-03. Reported, not gospel: confirm with one cheap check, then trust them.
+
+- Studio v6 requires **Node 22.12+** (confirmed in `sanity@6.17.0`).
+- Deploying the **schema** is a separate step from deploying the Studio: `sanity schema deploy`.
+- **TypeScript resolves to 7.0.2**, a new major version. Confirm Next.js and Sanity tolerate it and pin to 5.x if not. This will bite you the same way it bit the sibling repo.
+- pnpm may print an **ignored builds** warning; some install scripts need approving with `pnpm approve-builds`.
+- The shared pnpm store is already warm at `C:\Users\ncai\AppData\Local\pnpm\store\v11`, so your install should be fast.
+
+## Reporting protocol — read this
+
+Coordination happens through two files in this repository. You never read any
+sibling project folder; that rule stands.
+
+- **`docs/REPORT.md`** — you write. Append-only, newest at the bottom. Write an
+  entry when you finish a meaningful step, hit a blocker, depart from the spec,
+  or need a judgement call. Start each entry with a timestamp line, then
+  `STATE:` (one line) and `BLOCKED_ON:` (`none`, or exactly what you need).
+- **`docs/GUIDANCE.md`** — you read. Answers and sequencing arrive here. Check
+  the tail before starting new work, and again after writing a blocked entry.
+
+Rules that make this work:
+
+- **Never inline long URLs, query strings or hashes in a report.** Line wrapping
+  destroys them. Write them to a file and reference the path. A 743-character
+  TAP query was already lost this way once.
+- **Do not idle waiting for a reply.** Write the entry, then continue with
+  anything unblocked. Only stop if genuinely blocked.
+- **Append, never rewrite.** The exchange is part of the build-process record and
+  gets read by judges, so an honest trail beats a tidy one.
+- Both files are committed. Keep secrets out of them — reference variable names,
+  never values.

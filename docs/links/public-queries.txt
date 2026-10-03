@@ -1,0 +1,12 @@
+# Public GROQ queries against the pothole-shelter dataset (no token needed).
+# One URL per line; never paste these into reports or chat, reference this file.
+# Project fixjy07h, dataset production, API version 2025-02-19.
+
+# First five pets
+https://fixjy07h.api.sanity.io/v2025-02-19/data/query/production?query=*[_type=="pothole"][0...5]
+
+# Counts by type (URL-encoded)
+https://fixjy07h.api.sanity.io/v2025-02-19/data/query/production?query=%7B%22complaint311%22%3Acount(*%5B_type%3D%3D%22complaint311%22%5D)%2C%22pothole%22%3Acount(*%5B_type%3D%3D%22pothole%22%5D)%2C%22statusEvent%22%3Acount(*%5B_type%3D%3D%22statusEvent%22%5D)%2C%22syncRun%22%3Acount(*%5B_type%3D%3D%22syncRun%22%5D)%7D
+
+# Latest sync runs
+https://fixjy07h.api.sanity.io/v2025-02-19/data/query/production?query=*[_type=="syncRun"]|order(startedAt%20desc)[0...5]{_id,state,mode,fetched,created,updated,unchanged,statusEvents}
