@@ -181,3 +181,7 @@ BLOCKED_ON: none.
 - **Spec "Verify" item confirmed:** definition documents use dotted IDs (`prod.pothole-lifecycle.v1`, etc.) and are invisible to anonymous queries (0 visible). Public pages must read workflow state through a server-side read-only proxy, as the spec anticipated. Instances will be the same.
 - Total documents: 5,054.
 - Next: the adoption form + server approval route, the read-only workflow proxy, the App SDK Shelter Office, README with CI badge, then the post draft.
+
+## 2026-10-04T16:20Z — agent
+STATE: README added with CI + sync badges (both render "passing"); fallback snapshot refreshed (2,512 pets); site redeployed to production and re-checked (all pages 200, current workflow status text).
+BLOCKED_ON: none. Note: the first scheduled hourly sync had not yet recorded a run at 16:20Z; GitHub often delays a newly added schedule. The /sync page shows actual run times, so this stays visible.
