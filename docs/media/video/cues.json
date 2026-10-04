@@ -1,0 +1,100 @@
+{
+  "durationSeconds": 146.3,
+  "cues": [
+    {
+      "at": 1.5,
+      "scene": "Gallery",
+      "say": "Every pet here is a real pothole complaint filed with NYC 311 in Queens Community Board 13 — 2,512 of them."
+    },
+    {
+      "at": 5.5,
+      "scene": "Totals",
+      "say": "Their fates follow the city record: adopted when DOT repairs them, ghosts when nobody finds them, feral when they wait more than 60 days."
+    },
+    {
+      "at": 10.7,
+      "scene": "Feral of the week",
+      "say": "Feral of the week is picked by the calendar, not by merit. This one has been waiting since the date on its record."
+    },
+    {
+      "at": 16.8,
+      "scene": "Filters",
+      "say": "Filter by outcome and age. Hundreds of complaints have been open for over a year: that is the real backlog."
+    },
+    {
+      "at": 29.4,
+      "scene": "Feral pet",
+      "say": "A pet page: name, temperament and a bio. The bio may only restate facts from the record; Gemini restyles it and a fact guard rejects any changed date, number or street."
+    },
+    {
+      "at": 34.4,
+      "scene": "Rounded map pin",
+      "say": "Location is rounded to about 100 metres. No house numbers, ever."
+    },
+    {
+      "at": 40.1,
+      "scene": "Timeline",
+      "say": "The status timeline: every change cites the complaint field that caused it. The sync is the only thing that can change an outcome."
+    },
+    {
+      "at": 46.7,
+      "scene": "Complaint history",
+      "say": "The complaint history is the city's record, exactly as published."
+    },
+    {
+      "at": 52,
+      "scene": "Real 311 record",
+      "say": "And here is that complaint on NYC Open Data. Nothing is invented."
+    },
+    {
+      "at": 61.6,
+      "scene": "Map",
+      "say": "Only 38 percent of complaints have coordinates, so the map holds fewer than half the shelter."
+    },
+    {
+      "at": 69.6,
+      "scene": "Lost strays",
+      "say": "The rest are lost strays: complaints about a stretch of street between two cross streets. We list them by street instead of guessing a point."
+    },
+    {
+      "at": 83.7,
+      "scene": "Ghost hall",
+      "say": "The ghost hall: the city inspected and didn't find the reported problem. Not anyone's fault — potholes get patched, or move on."
+    },
+    {
+      "at": 94.3,
+      "scene": "Adopt",
+      "say": "Anyone can leave a pet an adoption note. It is filtered, rate-limited, and stored privately."
+    },
+    {
+      "at": 109,
+      "scene": "Awaiting moderation",
+      "say": "It starts an adoption-moderation workflow and waits. Nothing a visitor types is public until a person approves it in the Shelter Office."
+    },
+    {
+      "at": 115.8,
+      "scene": "Sync log",
+      "say": "The sync log: last sync time, every run, and the unmapped phrases we refuse to guess."
+    },
+    {
+      "at": 126.8,
+      "scene": "Office mirror",
+      "say": "The public mirror of the Shelter Office, with live workflow state: a lifecycle instance for every open pet, and the review queues."
+    },
+    {
+      "at": 137.5,
+      "scene": "Shelter Office (insert your Dashboard clip here)",
+      "say": "Insert the recorded Shelter Office clip: approve the note, then show it on the pet page."
+    },
+    {
+      "at": 141.3,
+      "scene": "How it works",
+      "say": "Raw records stay untouched, pet fields live separately, and every fate is the city’s own. Celebrate the repairs."
+    },
+    {
+      "at": 146.3,
+      "scene": "End",
+      "say": ""
+    }
+  ]
+}

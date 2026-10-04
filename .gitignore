@@ -47,3 +47,6 @@ web/public/maplibre
 # playwright output
 web/test-results
 web/playwright-report
+
+# walkthrough video: local editing source, uploaded to DEV/YouTube, not committed
+docs/media/video/*.webm
