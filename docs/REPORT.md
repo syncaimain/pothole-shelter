@@ -205,3 +205,7 @@ BLOCKED_ON: Owner — (1) approve one real adoption note in the Shelter Office, 
 - Unique pet names: 2,512 names for 2,512 pets (pedigree ordinals). The live re-sync after the rename was idempotent.
 - The public workflow-state proxy is on /office (totals only). docs/POST.md has been fitted to the Path Two template, with 18 screenshots and a voiceover script (docs/media/).
 - Tests: 98 unit/workflow (sync 56 · workflows 20 · agent 8 · web 11 · ingest 3) + 26 e2e.
+
+## 2026-10-04T20:40Z — agent
+STATE: **Judge path step 4 verified end to end, by the owner.** Two notes ("jh", "Shelter demo video") were approved in the Shelter Office by a person id (`gzFydZyee`). The engine recorded the same id as decider, both instances reached `approved`, and the public `adoption-<uuid>` copies exist. Two notes are still pending: the test note (to reject) and "Shelter demo, take two".
+BLOCKED_ON: Owner — the Shelter Office clip must be recorded by hand. Claude in Chrome can screenshot the Dashboard, but its clicks don't reach the App SDK app inside the Dashboard's cross-origin iframe: two clicks, no effect, buttons never went busy. Its element finder also hit an account rate limit. Nothing was changed by the attempt.
