@@ -72,8 +72,8 @@ export default function HowItWorks() {
       </p>
       <p>
         <strong>Status:</strong> all three definitions are deployed to the dataset (version 1, 4 October 2026). Their documents use
-        dotted IDs, which Sanity never serves to anonymous readers, so public pages read workflow state through a read-only server
-        proxy. The sync applies the lifecycle rules in code and is the only writer of outcomes; only a robot token may fire the
+        dotted IDs, which Sanity never serves to anonymous readers, so public pages need a read-only server proxy to show
+        workflow state (being built). The sync applies the lifecycle rules in code and is the only writer of outcomes; only a robot token may fire the
         lifecycle&rsquo;s &ldquo;record outcome&rdquo; action, and only a person may approve a merge or an adoption note. Engine gates
         are advisory by design, so server checks do the real enforcement.
       </p>
