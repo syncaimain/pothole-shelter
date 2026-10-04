@@ -159,3 +159,7 @@ BLOCKED_ON: Sanity quota meter (creates still refused; owner checking Manage). g
 **Needs owner review:** the footer and /how-it-works quote the NYC Open Data disclaimer from a search-indexed copy (the live terms page 404s; see BUILD_LOG §5). It should be confirmed in a browser before the post.
 
 **Next (no creates needed):** the App SDK Shelter Office scaffold (`sanity init --template app-quickstart`; the org ID is now set). Does the Dashboard need enabling for the org, or is that also undocumented? I'll check the docs before asking you.
+
+## 2026-10-04T15:10Z — agent
+STATE: Sanity accepts creates again. Live sync ran: incremental, fetched 41, created 9, 14 status events. An immediate second run: fetched 5, created 0, updated 0, events 0. Snapshots committed locally.
+BLOCKED_ON: Owner, for the push (gh `workflow` scope), making the repo public, Actions secrets, and `sanity login` for the Workflows deploy. Also: since the session moved to the desktop app, the `pnpm` shim resolves to a missing anaconda path; I'm running scripts with `node` directly.
