@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      # Reads the pnpm version from package.json "packageManager".
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm -r typecheck
+      - name: Unit and workflow tests
+        run: pnpm -r test
+      - name: Snapshot checksums match their manifests
+        run: pnpm --filter @pothole/ingest measure:clusters
+      - name: Build web
+        run: pnpm --filter @pothole/web build
+      - name: Build studio
+        run: pnpm --filter @pothole/studio build

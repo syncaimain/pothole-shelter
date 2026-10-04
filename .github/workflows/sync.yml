@@ -1,0 +1,49 @@
+name: 311 sync
+
+# Manual only for now. The hourly schedule stays off until the Sanity document cap is
+# confirmed (see docs/REPORT.md, 2026-10-03T23:52Z): every run writes a syncRun document.
+# Vercel Hobby crons are daily-only, so GitHub Actions is the hourly scheduler of record.
+on:
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Force a full refetch instead of an incremental one
+        type: boolean
+        default: false
+  # schedule:
+  #   - cron: '17 * * * *'
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sync NYC 311 → Sanity
+        env:
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+        run: pnpm --filter @pothole/sync sync ${{ inputs.full && '--full' || '' }}
+      # Snapshots are part of the reproducibility record, so they are committed even
+      # when the run failed (a failed run may still have saved the pages it fetched).
+      - name: Commit raw snapshots
+        if: always()
+        run: |
+          git add ingest/data/raw
+          if git diff --cached --quiet; then echo "no new snapshots"; exit 0; fi
+          git -c user.name="pothole-sync" -c user.email="pothole-sync@users.noreply.github.com" \
+            commit -m "Sync snapshot $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
