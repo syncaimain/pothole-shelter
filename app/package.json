@@ -2,15 +2,23 @@
   "name": "@pothole/app",
   "private": true,
   "type": "module",
-  "description": "App SDK Shelter Office (logged-in staff). Scaffolded from the app-quickstart template once SANITY_ORG_ID is set.",
+  "description": "App SDK Shelter Office (logged-in staff): moderation and review queues, sync health, live lifecycle board.",
   "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@pothole/sync": "workspace:*",
+    "@sanity/client": "^8.9.0",
     "@sanity/sdk": "3.7.0",
     "@sanity/sdk-react": "3.7.0",
+    "@sanity/workflow-engine": "0.36.0",
     "react": "^19.2.2",
-    "react-dom": "^19.2.2"
+    "react-dom": "^19.2.2",
+    "sanity": "6.17.0",
+    "styled-components": "^6.4.2"
   },
   "devDependencies": {
     "@types/react": "^19"

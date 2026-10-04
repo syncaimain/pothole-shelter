@@ -10,3 +10,9 @@ https://fixjy07h.api.sanity.io/v2025-02-19/data/query/production?query=%7B%22com
 
 # Latest sync runs
 https://fixjy07h.api.sanity.io/v2025-02-19/data/query/production?query=*[_type=="syncRun"]|order(startedAt%20desc)[0...5]{_id,state,mode,fetched,created,updated,unchanged,statusEvents}
+
+# Shelter Office (App SDK, needs an org login)
+https://www.sanity.io/@ojpmneh29/application/s1uy9cp36h3zd8guo7doufha
+
+# Studio (needs a project member login)
+https://pothole-shelter.sanity.studio/
