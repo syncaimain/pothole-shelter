@@ -4,10 +4,10 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import {LngLatBounds, Map as MapLibreMap, NavigationControl, setWorkerUrl, type MapLayerMouseEvent} from 'maplibre-gl'
 import {useEffect, useRef} from 'react'
 
-// OpenFreeMap: free public tiles, no key, no request limits; attribution required.
-// https://openfreemap.org — "OpenFreeMap © OpenMapTiles Data from OpenStreetMap"
+// OpenFreeMap: free public tiles, no key, no request limits; attribution required. The style
+// carries its own attribution (OpenFreeMap © OpenMapTiles Data from OpenStreetMap), which the
+// attribution control shows; adding it again printed it twice.
 const STYLE = 'https://tiles.openfreemap.org/styles/positron'
-const ATTRIBUTION = 'OpenFreeMap © OpenMapTiles Data from OpenStreetMap'
 
 // Served by scripts/copy-maplibre-worker.mjs; the bundler does not emit MapLibre's worker.
 setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
@@ -43,7 +43,7 @@ export function ShelterMap({points, height = 420, zoom}: {points: MapPoint[]; he
       style: STYLE,
       center: [points[0]!.lng, points[0]!.lat],
       zoom: zoom ?? 13,
-      attributionControl: {compact: false, customAttribution: ATTRIBUTION},
+      attributionControl: {compact: false},
     })
     map.addControl(new NavigationControl({showCompass: false}))
 
