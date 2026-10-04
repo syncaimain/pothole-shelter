@@ -30,3 +30,23 @@ jobs:
         run: pnpm --filter @pothole/web build
       - name: Build studio
         run: pnpm --filter @pothole/studio build
+
+  e2e:
+    # The spec's judge path plus axe-core on every page, desktop and mobile. Reads only
+    # public data; the adoption test submits an invalid note, which is refused unstored.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for Playwright
+        run: pnpm --filter @pothole/web exec playwright install --with-deps chromium
+      - name: Build web
+        run: pnpm --filter @pothole/web build
+      - name: Judge path and accessibility
+        run: pnpm --filter @pothole/web e2e

@@ -40,7 +40,7 @@ async function Runs() {
         )}
       </p>
       <h2 id="runs">Recent runs</h2>
-      <div className="table-scroll">
+      <div className="table-scroll" tabIndex={0} role="region" aria-label="Recent sync runs (scrolls sideways)">
         <table>
           <thead>
             <tr>
@@ -112,7 +112,7 @@ async function Mappings() {
       <section aria-labelledby="mappings">
         <h2 id="mappings">Resolution mappings</h2>
         <p>Each closed complaint&rsquo;s resolution text is matched exactly against these documents. A person wrote every one.</p>
-        <div className="table-scroll">
+        <div className="table-scroll" tabIndex={0} role="region" aria-label="Resolution mappings (scrolls sideways)">
           <table>
             <thead>
               <tr>

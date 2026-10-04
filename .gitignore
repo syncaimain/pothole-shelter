@@ -43,3 +43,7 @@ Thumbs.db
 
 # copied from node_modules at build time (scripts/copy-maplibre-worker.mjs)
 web/public/maplibre
+
+# playwright output
+web/test-results
+web/playwright-report
