@@ -2,7 +2,7 @@
 // (the only kind of caller pothole-lifecycle's record-outcome action admits).
 import type {SanityClient} from '@sanity/client'
 import {createEngine, gdrRef} from '@sanity/workflow-engine'
-import {LIFECYCLE_DEFINITION, planLifecycles, type LifecycleOp, type LifecyclePet} from './lifecycle.ts'
+import {CLAIM_TTL_MS, CLAIMED, LIFECYCLE_DEFINITION, planLifecycles, type LifecycleOp, type LifecyclePet} from './lifecycle.ts'
 import {SANITY_DATASET, SANITY_PROJECT_ID} from './sanityStore.ts'
 
 export const WORKFLOW_RESOURCE = {type: 'dataset' as const, id: `${SANITY_PROJECT_ID}.${SANITY_DATASET}`}
@@ -30,6 +30,16 @@ export async function reconcileLifecycles(client: SanityClient, opts: {concurren
       let instanceId: string
       let stage: string
       if (op.kind === 'start') {
+        // Claim the pet first, under an optimistic lock, so two runners (the hourly sync and a
+        // manual bootstrap) can never start two instances for the same pet.
+        const pet = await client.fetch<{_rev: string; lifecycle?: {instance: string; claimedAt?: string}} | null>(`*[_id == $id][0]{_rev, lifecycle}`, {id: op.petId})
+        const held = pet?.lifecycle && (pet.lifecycle.instance !== CLAIMED || Date.now() - Date.parse(pet.lifecycle.claimedAt ?? '') < CLAIM_TTL_MS)
+        if (!pet || held) return
+        try {
+          await client.patch(op.petId).ifRevisionId(pet._rev).set({lifecycle: {instance: CLAIMED, stage: CLAIMED, claimedAt: new Date().toISOString()}}).commit()
+        } catch {
+          return // someone else claimed it first
+        }
         const {instance} = await engine.startInstance({
           definition: LIFECYCLE_DEFINITION,
           initialFields: [

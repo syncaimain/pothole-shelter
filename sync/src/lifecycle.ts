@@ -12,7 +12,10 @@ const OPEN = new Set(['shelter', 'feral'])
 
 /** What the sync stores on the pet about its lifecycle instance. */
 export interface LifecycleState {
+  /** The instance id, or CLAIMED while a runner is starting one. */
   instance: string
+  /** Set with a claim, so an abandoned claim (a crashed runner) can be retried. */
+  claimedAt?: string
   /** The last stage the sync drove it to: shelter | feral | adopted | ghost | transferred | unmapped. */
   stage: string
 }
@@ -31,13 +34,19 @@ export type LifecycleOp =
   | {kind: 'record'; petId: string; instance: string; outcome: string; complaint: string; field: string}
   | {kind: 'tick'; petId: string; instance: string}
 
+export const CLAIMED = 'claimed'
+/** A claim older than this is treated as abandoned. */
+export const CLAIM_TTL_MS = 15 * 60_000
+
 export const feralAtFor = (firstReportedAt: string) => new Date(Date.parse(firstReportedAt) + FERAL_AFTER_DAYS * DAY_MS).toISOString()
 
-export function planLifecycles(pets: readonly LifecyclePet[]): LifecycleOp[] {
+export function planLifecycles(pets: readonly LifecyclePet[], now = Date.now()): LifecycleOp[] {
   const ops: LifecycleOp[] = []
   for (const p of pets) {
     const open = OPEN.has(p.outcome)
-    if (!p.lifecycle) {
+    const claim = p.lifecycle?.instance === CLAIMED
+    if (claim && now - Date.parse(p.lifecycle!.claimedAt ?? '') < CLAIM_TTL_MS) continue // another runner is on it
+    if (!p.lifecycle || claim) {
       // Only open pets get an instance; pets that closed before the engine existed keep
       // their history in the embedded events and are not back-filled.
       if (open && p.firstReportedAt) {

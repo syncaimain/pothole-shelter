@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {feralAtFor, planLifecycles, type LifecyclePet} from '../src/lifecycle.ts'
+import {CLAIMED, feralAtFor, planLifecycles, type LifecyclePet} from '../src/lifecycle.ts'
 
 const base: LifecyclePet = {_id: 'pothole-1', outcome: 'shelter', firstReportedAt: '2026-08-20T20:22:35.000Z'}
 const last = {to: 'adopted', cause: {complaint: {_ref: 'complaint311-1'}, field: 'status'}}
@@ -42,5 +42,17 @@ describe('planLifecycles', () => {
       {...base, _id: 'g', outcome: 'ghost', lifecycle: {instance: 'j', stage: 'ghost'}},
     ]
     expect(planLifecycles(pets)).toEqual([])
+  })
+})
+
+describe('claims', () => {
+  const now = Date.parse('2026-10-04T18:00:00.000Z')
+  it('skips a pet another runner claimed recently', () => {
+    const pet = {...base, lifecycle: {instance: CLAIMED, stage: CLAIMED, claimedAt: '2026-10-04T17:55:00.000Z'}}
+    expect(planLifecycles([pet], now)).toEqual([])
+  })
+  it('retries a claim abandoned for over 15 minutes', () => {
+    const pet = {...base, lifecycle: {instance: CLAIMED, stage: CLAIMED, claimedAt: '2026-10-04T17:30:00.000Z'}}
+    expect(planLifecycles([pet], now)).toMatchObject([{kind: 'start', petId: 'pothole-1'}])
   })
 })

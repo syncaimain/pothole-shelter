@@ -16,9 +16,10 @@ const engine = createEngine({client, tag: 'prod', workflowResource: res})
 
 const complaints = await client.fetch<RawRecord[]>(`*[_type == "complaint311"].raw`)
 const proposals = proposeClusters(complaints)
-const existing = new Set(await client.fetch<string[]>(`*[_type == "clusterDecision"]._id`))
-const fresh = proposals.filter((p) => !existing.has(p._id))
-console.log(`${complaints.length} complaints → ${proposals.length} proposals; ${fresh.length} new`)
+// A decision written without its instance (an interrupted run) still needs one.
+const done = new Set(await client.fetch<string[]>(`*[_type == "clusterDecision" && defined(workflowInstance)]._id`))
+const fresh = proposals.filter((p) => !done.has(p._id))
+console.log(`${complaints.length} complaints → ${proposals.length} proposals; ${fresh.length} still need writing or a workflow instance`)
 if (dryRun) process.exit(0)
 
 const now = new Date().toISOString()

@@ -12,6 +12,10 @@ if (!token) {
   process.exit(2)
 }
 
+// Each engine operation makes several sequential requests (~7 per minute observed), so an
+// hourly run does at most this many; a backlog drains over successive runs.
+const LIFECYCLE_OPS_PER_RUN = 40
+
 const snapshotDir = fileURLToPath(new URL('../../ingest/data/raw/', import.meta.url))
 const client = sanityWriteClient(token)
 const run = await runSync({
@@ -23,7 +27,7 @@ const run = await runSync({
 
 // Keep the workflow instances in step with the outcomes this run wrote. A lifecycle failure
 // never fails the sync: the data is already correct; the engine catches up next run.
-const lifecycles = run.state === 'succeeded' ? await reconcileLifecycles(client, {limit: 400}) : undefined
+const lifecycles = run.state === 'succeeded' ? await reconcileLifecycles(client, {limit: LIFECYCLE_OPS_PER_RUN}) : undefined
 
 const {snapshots, ...summary} = run
 console.log(JSON.stringify({...summary, snapshotPages: snapshots?.length ?? 0, lifecycles}, null, 2))
