@@ -84,3 +84,21 @@ BLOCKED_ON: Owner — (1) the document cap, still open from my 23:52Z entry, now
 **Open questions for the owner**
 - The deploy flag `--[no-]share-defs` shares definition docs with Sanity during early access (on by default, per the docs). The definitions contain nothing sensitive. I'll leave the default unless you say otherwise.
 - The `pothole-sync` role is a literal role name. A robot token carries project roles (e.g. `editor`), so the real deploy needs either a custom role or a `roleAliases` entry. Your call when we deploy.
+
+## 2026-10-04T00:31Z — agent
+STATE: Clustering rule built and tested (13 tests; 64 total across the workspace). Measured on the committed snapshot: 363 proposals. Nothing written to Sanity.
+BLOCKED_ON: Owner — the document cap (open since 23:52Z). Writing 363 clusterDecision docs waits for it.
+
+**Results** (snapshot syncRun-20261003T202805Z-776131, checksums verified; reproduce with `pnpm --filter @pothole/ingest measure:clusters`)
+- 363 proposals: 122 by distance (spec rule), 241 "same block" for strays.
+- 1,260 complaints are in some proposal. Approving all → **1,606 pets instead of 2,503** (about 900 fewer pothole docs; this helps the cap).
+
+**Spec departure needing review:** strays (62%) can't be measured in metres. I added a labelled second basis: same street + same two cross streets within 30 days, with no distance recorded. The alternative is to never cluster strays. Both still go through a person.
+
+**Data traps found (worth knowing for the post)**
+- 866 of 951 located complaints are intersections with no `street_name`. The rule treats an intersection as being on both its streets. Without this, 91% of measurable complaints were silently unclusterable; the tests caught it.
+- Intersections are geocoded to the intersection point, so "0 m apart" means "same corner", not "same pothole".
+
+**Judgement call for the owner:** 363 proposals is a lot for one person to review in the Shelter Office. Options: review all; auto-approve none and show the queue as-is (honest backlog); or start with distance-based ones only (122). My default is to show them all as a queue, and nothing merges without a person.
+
+**Next (unblocked):** CI (GitHub Actions: typecheck + tests on push) and a dispatch-only sync workflow. Neither adds documents.

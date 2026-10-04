@@ -10,7 +10,8 @@
     "typecheck": "tsc -p .",
     "test": "vitest run --passWithNoTests",
     "discover": "node --env-file-if-exists=../.env.local discover_resolutions.ts",
-    "seed:mappings": "node --env-file-if-exists=../.env.local seed_mappings.ts"
+    "seed:mappings": "node --env-file-if-exists=../.env.local seed_mappings.ts",
+    "measure:clusters": "node measure_clusters.ts"
   },
   "dependencies": {
     "@pothole/sync": "workspace:*"

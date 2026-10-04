@@ -355,3 +355,19 @@ asserts the specific "action filter returned false" error, so it can't pass for 
   Growth and daily on Free. Recommendation: the hourly sync ticks open instances itself.
 - **Engine gates are advisory twice over:** the actor is "provenance, not an authenticated principal", and
   mutation guards are "not enforced by the lake yet". Server routes must enforce who changes outcomes and who approves.
+
+### Clustering rule (pure code + 13 tests; proposals measured, nothing written)
+
+- The spec rule is 60 m / 30 days / same street. **Strays can't be measured in metres**, so a second, clearly labelled
+  basis applies to them: same street *and* the same two cross streets (the same block) within 30 days. These proposals carry
+  **no `distanceMetres`**, and their reason says "no coordinates to measure". A stray is never linked to a located complaint.
+- **The tests caught a data trap:** 866 of the 951 located complaints are `INTERSECTION` rows with **no `street_name`**,
+  only `intersection_street_1/2`. Keyed on `street_name`, the rule would have ignored 91% of the measurable complaints.
+  Fix: an intersection is on both of its streets.
+- Measured on snapshot `syncRun-20261003T202805Z-776131` (checksums verified), via `pnpm --filter @pothole/ingest measure:clusters`:
+  **363 proposals** (122 by distance, 241 same-block), covering 1,260 complaints. If every one were approved, CB 13 would
+  have **1,606 pets instead of 2,503**. Largest: 35 complaints on one block of 267 Street in 20 days.
+- **"0 m apart" is an artifact.** Intersection complaints are geocoded to the intersection point, so a 16-complaint group
+  "within 0 m" means "the same corner", not proof of one pothole. A reviewer must know this; the post should say it.
+- Single linkage chains: no distance group spreads past 60 m, but time spans chain up to 99 days through 30-day links.
+  The reason text reports the true spread and span, and a person decides.
