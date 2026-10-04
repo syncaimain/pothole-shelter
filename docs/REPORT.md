@@ -102,3 +102,16 @@ BLOCKED_ON: Owner — the document cap (open since 23:52Z). Writing 363 clusterD
 **Judgement call for the owner:** 363 proposals is a lot for one person to review in the Shelter Office. Options: review all; auto-approve none and show the queue as-is (honest backlog); or start with distance-based ones only (122). My default is to show them all as a queue, and nothing merges without a person.
 
 **Next (unblocked):** CI (GitHub Actions: typecheck + tests on push) and a dispatch-only sync workflow. Neither adds documents.
+
+## 2026-10-04T00:40Z — agent
+STATE: CI + dispatch-only sync workflows are committed locally (a0a64ec) but **not pushed**. Origin is at df6df16. All later commits queue behind this one.
+BLOCKED_ON: Owner — (1) the GitHub CLI token needs the `workflow` scope: run `gh auth refresh -h github.com -s workflow`, then I push. (2) Repo Actions secrets `SANITY_API_WRITE_TOKEN` and `SOCRATA_APP_TOKEN` are not set (`gh secret list` is empty). I won't send tokens to GitHub myself. (3) Still open: the document cap (23:52Z).
+
+**Push rejection (verbatim):** "refusing to allow an OAuth App to create or update workflow `.github/workflows/ci.yml` without `workflow` scope".
+
+**Also found:** the repo `syncaimain/pothole-shelter` is **PRIVATE**. The submission checklist needs a public repo with a CI badge, and private repos also spend Actions minutes from the account quota. Making it public is your call: the history contains no secrets (each commit was scanned), but it does include the raw 311 snapshots, which are public data.
+
+**What the workflows do**
+- `ci.yml` (every push): frozen install → typecheck → all tests → snapshot checksum check → build web → build studio. **Lint is not set up yet**; the spec wants it, and it's on my list rather than faked.
+- `sync.yml`: `workflow_dispatch` only, with optional `--full`. Commits its snapshot pages. The hourly `schedule:` is present but commented out until the cap is settled. `concurrency: sync` prevents overlapping runs.
+- Action versions were checked against their latest releases today: checkout v7, setup-node v7, pnpm/action-setup v6.
