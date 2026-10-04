@@ -37,3 +37,6 @@ Thumbs.db
 
 # typescript incremental build info
 *.tsbuildinfo
+
+# vercel link (local)
+.vercel

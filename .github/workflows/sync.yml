@@ -1,7 +1,7 @@
 name: 311 sync
 
-# Manual only for now. The hourly schedule stays off until the Sanity document cap is
-# confirmed (see docs/REPORT.md, 2026-10-03T23:52Z): every run writes a syncRun document.
+# Hourly. Each run writes one syncRun document (24/day); the cap was resolved on 2026-10-04 by
+# folding status events into the pet documents (10,022 -> ~5,000 documents).
 # Vercel Hobby crons are daily-only, so GitHub Actions is the hourly scheduler of record.
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ on:
         description: Force a full refetch instead of an incremental one
         type: boolean
         default: false
-  # schedule:
-  #   - cron: '17 * * * *'
+  schedule:
+    - cron: '17 * * * *'
 
 concurrency:
   group: sync

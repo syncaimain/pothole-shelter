@@ -1,0 +1,4 @@
+# The site never reads the raw 311 snapshots; keep the upload small.
+ingest/data/raw
+**/.next
+**/dist
