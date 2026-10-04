@@ -1,0 +1,39 @@
+{
+  "model": "gemini-3.7-flash (version 3.7-flash-08-2026)",
+  "generatedAt": "2026-10-04T17:24:31.512Z",
+  "attempted": 6,
+  "accepted": 6,
+  "rejected": 0,
+  "results": [
+    {
+      "pet": "pothole-70606384",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68680952",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68658968",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70042540",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69967387",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68666493",
+      "outcome": "unmapped",
+      "accepted": true
+    }
+  ]
+}

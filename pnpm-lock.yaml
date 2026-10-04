@@ -199,6 +199,9 @@ importers:
       '@ai-sdk/mcp':
         specifier: ^2.0.66
         version: 2.0.66(zod@4.6.5)
+      '@pothole/sync':
+        specifier: workspace:*
+        version: link:../sync
       ai:
         specifier: ^7.0.127
         version: 7.0.127(zod@4.6.5)

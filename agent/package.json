@@ -3,10 +3,18 @@
   "private": true,
   "type": "module",
   "description": "Bio writer and cluster proposer (Gemini via the AI SDK) with the fact guard",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc -p .",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "restyle": "node --env-file-if-exists=../.env.local src/restyleCli.ts"
   },
-  "dependencies": { "ai": "^7.0.127", "@ai-sdk/google": "^4.0.87", "@ai-sdk/mcp": "^2.0.66" }
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.87",
+    "@ai-sdk/mcp": "^2.0.66",
+    "@pothole/sync": "workspace:*",
+    "ai": "^7.0.127"
+  }
 }
