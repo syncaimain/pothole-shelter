@@ -55,7 +55,7 @@ The rule I never broke: **nothing about a pet is made up, and nothing about its 
 
 [VIDEO: upload docs/media/video/pothole-shelter-demo-voiced.mp4 (2:43) to YouTube with docs/media/video/captions.srt as its captions, then embed the link here]
 
-*The narration is synthetic: each caption line was voiced with Gemini TTS () by , so voice and captions say the same words at the same moments.*
+*The narration is synthetic: each caption line was voiced with Gemini TTS (`gemini-3.8-flash-tts`) by `docs/media/make-voiceover.mjs`, so voice and captions say the same words at the same moments.*
 
 **The judge path:**
 1. Open the [gallery](https://pothole-shelter.vercel.app/?outcome=feral&age=years) and click a Feral pet.
