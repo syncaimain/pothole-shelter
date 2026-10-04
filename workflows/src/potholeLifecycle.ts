@@ -8,11 +8,15 @@ import {
 } from '@sanity/workflow-engine/define'
 
 /**
- * The role the sync runtime's actor carries. Engine gates are advisory (the actor is
- * "provenance, not an authenticated principal"), so this documents intent; the server
- * enforces it for real by accepting outcome writes only from the sync token.
+ * Only the sync, which runs on a robot token, may record outcomes. People are refused.
+ *
+ * Gated on the actor's id namespace (robot tokens start "p-", people "g"), not on a role:
+ * the deploy rejects role names the project doesn't have ("unknown role pothole-sync"),
+ * and `$actor.kind` can't be used because the engine stamps every actor "person".
+ * Advisory like every engine gate; the server enforces it for real by accepting outcome
+ * writes only from the sync token.
  */
-export const SYNC_ROLE = 'pothole-sync'
+export const SYNC_ONLY = 'string::startsWith($actor.id, "p-")'
 
 const OUTCOME_CHOICES = [
   {title: 'Adopted into forever pavement', value: 'adopted'},
@@ -29,7 +33,7 @@ const recordOutcome = defineAction({
   name: 'record-outcome',
   title: 'Record the city outcome',
   description: 'Fired by the sync when the 311 record closes, citing the complaint field that changed.',
-  roles: [SYNC_ROLE],
+  filter: SYNC_ONLY,
   params: [
     {type: 'string', name: 'outcome', required: true},
     {type: 'string', name: 'complaint', required: true},

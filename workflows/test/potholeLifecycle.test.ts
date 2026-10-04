@@ -1,14 +1,14 @@
 import type {Actor} from '@sanity/workflow-engine'
 import {createBench, subjectField} from '@sanity/workflow-engine-test'
 import {describe, expect, it} from 'vitest'
-import {potholeLifecycle, SYNC_ROLE} from '../src/potholeLifecycle.ts'
+import {potholeLifecycle} from '../src/potholeLifecycle.ts'
 
 // Real fixture: complaint 70133745 (Queens CB 13) was filed 2026-08-20 16:22:35 New York
 // time = 20:22:35Z, so the 60-day rule makes it feral at 2026-10-19T20:22:35Z.
 const PET = 'pothole-70133745'
 const FERAL_AT = '2026-10-19T20:22:35.000Z'
 
-const syncActor: Actor = {kind: 'system', id: 'p-syncRobot01', roles: [SYNC_ROLE]}
+const syncActor: Actor = {kind: 'system', id: 'p-syncRobot01', roles: ['editor']}
 const person: Actor = {kind: 'person', id: 'gStaffMember01', roles: ['editor']}
 
 async function start(now = '2026-10-03T20:00:00.000Z') {

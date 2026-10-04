@@ -172,3 +172,12 @@ BLOCKED_ON: Owner — finishing `sanity login` (terminal tab c2) so I can deploy
 - Actions secrets set from `.env.local` via stdin (values never printed): `SANITY_API_WRITE_TOKEN`, `SOCRATA_APP_TOKEN`.
 - Vercel account is on **Hobby**, confirming crons there would be daily-only. GitHub Actions `17 * * * *` is the hourly scheduler. Project `pothole-shelter`, root `web/`, Node 24.x.
 - The `pnpm` bash shim is broken in the desktop-app shell (it points at an anaconda path); I'm running `node .../pnpm/bin/pnpm.mjs` directly.
+
+## 2026-10-04T16:00Z — agent
+STATE: All three Workflows definitions deployed from the owner's `sanity login` session: "Processed 3 definition(s) · production (prod) → fixjy07h.production", sharing ON (default, approved).
+BLOCKED_ON: none.
+
+- First real deploy was refused: "unknown project roles … generated role condition references unknown role pothole-sync". The CLI validates role names against the project. Owner delegated the choice ("whatever best to win"). I replaced `roles: ['pothole-sync']` with an id-namespace filter, `string::startsWith($actor.id, "p-")` (robot tokens only). That is the same technique as the person-only gate (F33), and it needs no project change. 20 bench tests still pass: a person is refused with "action filter returned false", and the sync robot is allowed.
+- **Spec "Verify" item confirmed:** definition documents use dotted IDs (`prod.pothole-lifecycle.v1`, etc.) and are invisible to anonymous queries (0 visible). Public pages must read workflow state through a server-side read-only proxy, as the spec anticipated. Instances will be the same.
+- Total documents: 5,054.
+- Next: the adoption form + server approval route, the read-only workflow proxy, the App SDK Shelter Office, README with CI badge, then the post draft.

@@ -71,10 +71,11 @@ export default function HowItWorks() {
         moderation (Submitted → Approved or Rejected). All three pass the engine&rsquo;s validation and its test bench.
       </p>
       <p>
-        <strong>Status:</strong> the definitions are validated and diffed against the live dataset, but not yet deployed. Today the
-        sync applies the lifecycle rules in code (it is the only writer of outcomes). Server routes that check who may approve merges
-        and adoption notes are still being built. Engine gates are advisory by design, so those server checks are the real
-        enforcement.
+        <strong>Status:</strong> all three definitions are deployed to the dataset (version 1, 4 October 2026). Their documents use
+        dotted IDs, which Sanity never serves to anonymous readers, so public pages read workflow state through a read-only server
+        proxy. The sync applies the lifecycle rules in code and is the only writer of outcomes; only a robot token may fire the
+        lifecycle&rsquo;s &ldquo;record outcome&rdquo; action, and only a person may approve a merge or an adoption note. Engine gates
+        are advisory by design, so server checks do the real enforcement.
       </p>
 
       <h2>Data terms</h2>
