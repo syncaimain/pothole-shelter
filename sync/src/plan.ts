@@ -3,7 +3,7 @@ import {initialHistory, transitionEvent, type StatusEvent} from './events.ts'
 import {hashOf, sameData} from './hash.ts'
 import type {ResolutionMapping} from './mapping.ts'
 import {createdAt, isClosed} from './outcome.ts'
-import {derivePet, type PetFields} from './pets.ts'
+import {derivePet, uniquePetNames, type PetFields} from './pets.ts'
 import {inScope, rowUrl, splitRow, type RawRecord, type SodaRow} from './soda.ts'
 
 export interface ComplaintDoc {
@@ -167,6 +167,8 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
   // 3. Recompute every pet (the 60-day rule needs that even when no record changed).
   const petCreates: PetDoc[] = []
   const petPatches: PetPatch[] = []
+  // Every pet ever created keeps its place in the naming order, merged ones included.
+  const names = uniquePetNames([...new Set([...state.pets.keys(), ...members.keys()])].map((id) => id.replace(/^pothole-/, '')))
   for (const [petId, memberIds] of members) {
     if (memberIds.length === 0) {
       // Every complaint of this pet went to an approved cluster's survivor. The pet is kept,
@@ -183,7 +185,7 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
       .map((id) => ({id, raw: merged.get(id)!.raw}))
       .sort((a, b) => (createdAt(a.raw)?.getTime() ?? 0) - (createdAt(b.raw)?.getTime() ?? 0))
     const firstKey = petId.replace(/^pothole-/, '')
-    const derived = derivePet(firstKey, complaints, state.mappings, now)
+    const derived = derivePet(firstKey, complaints, state.mappings, now, names.get(firstKey))
     counts.unmapped += complaints.filter((c) => isClosed(c.raw) && derived.fields.outcome === 'unmapped').length
 
     const stored = state.pets.get(petId)

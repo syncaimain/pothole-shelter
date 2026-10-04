@@ -90,3 +90,24 @@ describe('pets', () => {
     expect(derivePet('k', three, MAPPINGS, T0).fields.temperament).toBe('grumpy')
   })
 })
+
+describe('unique pet names', () => {
+  it('gives every pet a distinct name, with pedigree ordinals in key order', async () => {
+    const {uniquePetNames, petName, roman} = await import('../src/pets.ts')
+    expect([2, 3, 4, 9, 14, 40].map(roman)).toEqual(['II', 'III', 'IV', 'IX', 'XIV', 'XL'])
+    const keys = Array.from({length: 3000}, (_, i) => String(68_000_000 + i))
+    const names = uniquePetNames(keys)
+    expect(new Set(names.values()).size).toBe(3000)
+    // The earliest key with a base name keeps the plain name; later ones get II, III, ...
+    const base = petName(keys[0]!)
+    const sharing = keys.filter((k) => petName(k) === base)
+    expect(sharing.map((k) => names.get(k))).toEqual(sharing.map((_, i) => (i === 0 ? base : `${base} ${roman(i + 1)}`)))
+  })
+
+  it('a newer key never changes an older pet\u2019s name', async () => {
+    const {uniquePetNames} = await import('../src/pets.ts')
+    const before = uniquePetNames(['100', '200', '300'])
+    const after = uniquePetNames(['100', '200', '300', '99999999'])
+    for (const k of ['100', '200', '300']) expect(after.get(k)).toBe(before.get(k))
+  })
+})

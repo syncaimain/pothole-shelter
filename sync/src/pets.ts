@@ -26,6 +26,33 @@ export function petName(firstKey: string): string {
   return `${pick(FIRST, h.slice(0, 8))} ${pick(LAST, h.slice(8, 16))}`
 }
 
+const ROMAN: [number, string][] = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
+export function roman(n: number): string {
+  let out = ''
+  for (const [v, s] of ROMAN) while (n >= v) (out += s), (n -= v)
+  return out
+}
+
+/**
+ * Unique names for a set of pets. 40 × 20 base names cover 800 combinations, so with
+ * thousands of pets they repeat; pets sharing a base name get pedigree ordinals (II, III…)
+ * in order of their first complaint key. 311 keys only grow, so a new pet always takes the
+ * next ordinal and an existing pet's name never changes.
+ */
+export function uniquePetNames(firstKeys: Iterable<string>): Map<string, string> {
+  const byBase = new Map<string, string[]>()
+  for (const k of new Set(firstKeys)) {
+    const base = petName(k)
+    byBase.set(base, [...(byBase.get(base) ?? []), k])
+  }
+  const names = new Map<string, string>()
+  for (const [base, keys] of byBase) {
+    keys.sort((a, b) => Number(a) - Number(b) || a.localeCompare(b))
+    keys.forEach((k, i) => names.set(k, i === 0 ? base : `${base} ${roman(i + 1)}`))
+  }
+  return names
+}
+
 export const petSlug = (name: string, firstKey: string) =>
   `${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${firstKey}`
 
@@ -143,10 +170,12 @@ export function derivePet(
   complaints: readonly {id: string; raw: RawRecord}[],
   mappings: readonly ResolutionMapping[],
   now: Date,
+  /** The unique name from uniquePetNames; defaults to the base name. */
+  uniqueName?: string,
 ): DerivedPet {
   const raws = complaints.map((c) => c.raw)
   const first = raws[0]!
-  const name = petName(firstKey)
+  const name = uniqueName ?? petName(firstKey)
   const decided = decidingComplaint(raws, mappings, now)
   const reported = createdAt(first)
   const end = raws.every(isClosed) ? closedAt(decided.raw) : now
