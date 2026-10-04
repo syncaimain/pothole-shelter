@@ -4,6 +4,7 @@
 import {createClient} from '@sanity/client'
 import {OUTCOMES, type Outcome} from '@pothole/sync/domain'
 import {cacheLife} from 'next/cache'
+import {PUBLIC_ADOPTION_FILTER} from './adopt'
 import {CARD, DETAIL, RUN, type FallbackSnapshot, type MappingRow, type PetCard, type PetDetail, type SyncRunRow} from './queries'
 
 export const PROJECT_ID = 'fixjy07h'
@@ -257,4 +258,27 @@ export async function getOffice(): Promise<Loaded<OfficeView>> {
         .map(({name, slug, e}) => ({name, slug, from: e.from, to: e.to, at: e.at, kind: e.cause.kind})),
     }),
   )
+}
+
+// --- Adoption notes ------------------------------------------------------------------
+
+export interface ApprovedNote {
+  displayName: string
+  message: string
+  moderatedAt?: string
+}
+
+/** Only notes a person approved (see lib/adopt.ts). Pending notes have private ids and never appear. */
+export async function getApprovedNotes(petId: string): Promise<ApprovedNote[]> {
+  'use cache'
+  cacheLife('minutes')
+  try {
+    if (process.env.SHELTER_FORCE_SNAPSHOT === '1') return []
+    return await client.fetch<ApprovedNote[]>(
+      `*[${PUBLIC_ADOPTION_FILTER} && pothole._ref == $petId] | order(moderatedAt desc)[0...20]{displayName, message, moderatedAt}`,
+      {petId},
+    )
+  } catch {
+    return [] // Notes are a nicety; the pet page never fails because of them.
+  }
 }

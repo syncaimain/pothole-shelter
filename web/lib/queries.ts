@@ -2,7 +2,7 @@
 // fallback exporter, so the snapshot always has exactly the shape the pages read.
 import type {Outcome} from '@pothole/sync/domain'
 
-export const CARD = `name, "slug": slug.current, outcome, temperament, street, crossStreet, firstReportedAt, lastEventAt, hasCoordinates, complaintCount`
+export const CARD = `"id": _id, name, "slug": slug.current, outcome, temperament, street, crossStreet, firstReportedAt, lastEventAt, hasCoordinates, complaintCount`
 
 export const DETAIL = `${CARD}, bio, communityBoard, location,
   "events": events[]{_key, from, to, at, cause{kind, field, oldValue, newValue, complaint}},
@@ -12,6 +12,7 @@ export const DETAIL = `${CARD}, bio, communityBoard, location,
 export const RUN = `_id, startedAt, finishedAt, state, mode, fetched, created, updated, unchanged, unmapped, statusEvents, error`
 
 export interface PetCard {
+  id: string
   name: string
   slug: string
   outcome: Outcome

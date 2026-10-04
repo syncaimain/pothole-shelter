@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
 import {Suspense} from 'react'
-import {getPet} from '@/lib/data'
+import {getApprovedNotes, getPet} from '@/lib/data'
 import {day, floating, outcomeDescription, street} from '@/lib/format'
 import {OutcomeBadge, SnapshotNotice, StrayBadge, Timeline} from '../../components'
 
@@ -65,6 +65,10 @@ async function Pet({params}: {params: Promise<{slug: string}>}) {
         </p>
       )}
 
+      <Suspense fallback={null}>
+        <Notes petId={pet.id} name={pet.name} />
+      </Suspense>
+
       <h2>Status timeline</h2>
       <Timeline events={pet.events} />
 
@@ -85,5 +89,21 @@ async function Pet({params}: {params: Promise<{slug: string}>}) {
         ))}
       </ol>
     </article>
+  )
+}
+
+async function Notes({petId, name}: {petId: string; name: string}) {
+  const notes = petId ? await getApprovedNotes(petId) : []
+  if (!notes.length) return null
+  return (
+    <section aria-labelledby="notes">
+      <h2 id="notes">Adoption notes for {name}</h2>
+      {notes.map((n, i) => (
+        <blockquote key={i} className="note">
+          <p style={{margin: 0}}>{n.message}</p>
+          <footer className="small muted">{n.displayName}</footer>
+        </blockquote>
+      ))}
+    </section>
   )
 }
