@@ -1,14 +1,14 @@
 1
 00:00:02,000 --> 00:00:05,950
-Every pet here is a real pothole complaint filed with NYC 311 in Queens Community Board 13 — 2,512 of them.
+Every pet here is a real NYC 311 pothole complaint.
 
 2
 00:00:06,000 --> 00:00:10,950
-Their fates follow the city record: adopted when DOT repairs them, ghosts when nobody finds them, feral when they wait more than 60 days.
+Fixed means adopted, not found means ghost, waiting means feral.
 
 3
 00:00:11,000 --> 00:00:16,950
-Feral of the week is picked by the calendar, not by merit. This one has been waiting since the date on its record.
+Feral of the week: picked by the calendar, not by merit.
 
 4
 00:00:17,000 --> 00:00:28,950
@@ -16,7 +16,7 @@ Filter by outcome and age. Hundreds of complaints have been open for over a year
 
 5
 00:00:29,000 --> 00:00:33,950
-A pet page: name, temperament and a bio. The bio may only restate facts from the record; Gemini restyles it and a fact guard rejects any changed date, number or street.
+Each bio restates only facts from the city record.
 
 6
 00:00:34,000 --> 00:00:39,950
@@ -24,7 +24,7 @@ Location is rounded to about 100 metres. No house numbers, ever.
 
 7
 00:00:40,000 --> 00:00:46,950
-The status timeline: every change cites the complaint field that caused it. The sync is the only thing that can change an outcome.
+The timeline: every change cites the record field that caused it.
 
 8
 00:00:47,000 --> 00:00:51,950
@@ -52,7 +52,7 @@ Anyone can leave a pet an adoption note. It is filtered, rate-limited, and store
 
 14
 00:01:49,000 --> 00:01:55,950
-It starts an adoption-moderation workflow and waits. Nothing a visitor types is public until a person approves it in the Shelter Office.
+It stays private until a person approves it in the Shelter Office.
 
 15
 00:01:56,000 --> 00:02:06,950
@@ -60,7 +60,7 @@ The sync log: last sync time, every run, and the unmapped phrases we refuse to g
 
 16
 00:02:07,000 --> 00:02:17,950
-The public mirror of the Shelter Office, with live workflow state: a lifecycle instance for every open pet, and the review queues.
+The Office mirror: a live workflow for every open pet, and the review queues.
 
 17
 00:02:18,000 --> 00:02:30,700
@@ -68,4 +68,4 @@ In the Shelter Office, a signed-in person approves the note. The workflow record
 
 18
 00:02:33,700 --> 00:02:38,700
-Raw records stay untouched, pet fields live separately, and every fate is the city’s own. Celebrate the repairs.
+Raw records stay untouched. Every fate is the city’s own.
