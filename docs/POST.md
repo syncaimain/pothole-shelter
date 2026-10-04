@@ -2,7 +2,7 @@
 title: Pothole Adoption Agency: 2,512 real NYC potholes, waiting for their forever pavement
 published: false
 tags: devchallenge, sanitychallenge, nextjs, sanity
-cover_image: "[COVER IMAGE: upload docs/media/screens/01-gallery.png or a custom cover]"
+cover_image: https://raw.githubusercontent.com/syncaimain/pothole-shelter/main/docs/media/cover/cover-dev-1000x420.png
 ---
 
 *This is a submission for the [Sanity Challenge, Path Two: Vibe-Code Something Strange](https://dev.to/challenges/sanity-2026-09-16)*

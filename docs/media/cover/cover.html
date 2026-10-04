@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pothole Adoption Agency — cover</title>
+<style>
+  /* Two sizes from one design: ?size=dev (1000×420, DEV cover) or ?size=yt (1280×720, video thumbnail).
+     The map is a crop of the live site's /map screenshot: every dot is a real 311 complaint. */
+  :root {
+    --bg: #fbf8f3; --ink: #22201c; --muted: #615b52; --line: #e4ddd2; --rust: #8a3b12;
+    --adopted: #1f6b3a; --ghost: #5b5b78; --transferred: #2f5b8a; --feral: #8a3b12; --shelter: #b08000;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: var(--bg); }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; color: var(--ink); overflow: hidden; }
+  .card { position: relative; display: grid; overflow: hidden; background: var(--bg); }
+  .dev { width: 1000px; height: 420px; grid-template-columns: 1fr 380px; }
+  .yt  { width: 1280px; height: 720px; grid-template-columns: 1fr 470px; }
+  .text { padding: 34px 20px 28px 44px; display: flex; flex-direction: column; }
+  .yt .text { padding: 60px 30px 50px 70px; }
+  .kicker { display: inline-flex; align-self: flex-start; gap: 8px; align-items: center; background: var(--rust); color: #fff;
+            font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; padding: 6px 12px; border-radius: 999px; }
+  .yt .kicker { font-size: 19px; padding: 8px 16px; }
+  h1 { font-size: 54px; line-height: 1.0; letter-spacing: -.02em; margin-top: 16px; font-weight: 800; }
+  .yt h1 { font-size: 86px; margin-top: 22px; }
+  .tag { font-size: 19px; line-height: 1.35; color: var(--muted); margin-top: 12px; max-width: 34ch; }
+  .yt .tag { font-size: 29px; margin-top: 18px; margin-bottom: 30px; }
+  .tag b { color: var(--ink); }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: auto; }
+  .stat { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; background: #fff;
+          border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px 5px 9px; }
+  .yt .stat { font-size: 21px; padding: 8px 16px 8px 13px; gap: 10px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+  .yt .dot { width: 16px; height: 16px; }
+  .stat .n { font-variant-numeric: tabular-nums; }
+  .stray { border-style: dashed; }
+  .foot { margin-top: 14px; font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+  .yt .foot { font-size: 18px; margin-top: 22px; }
+  .map { position: relative; margin: 18px 18px 18px 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line);
+         background: url(map-crop.png) center 38% / cover no-repeat; }
+  .dev .map { background-position: center 6%; }
+  .yt .map { margin: 34px 34px 34px 0; border-radius: 24px; }
+  .map::after { content: 'Every dot is a real complaint'; position: absolute; left: 12px; bottom: 12px; background: rgba(251,248,243,.94);
+                font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); }
+  .yt .map::after { font-size: 18px; padding: 8px 14px; left: 18px; bottom: 18px; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="text">
+    <span class="kicker">Now adopting · Queens, NYC</span>
+    <h1>Pothole<br>Adoption Agency</h1>
+    <p class="tag"><b>2,512 real NYC 311 potholes</b>, waiting for their forever pavement. Their fates follow the city&rsquo;s own record.</p>
+    <div class="stats">
+      <span class="stat"><span class="dot" style="background:var(--adopted)"></span><span class="n">668</span> adopted</span>
+      <span class="stat"><span class="dot" style="background:var(--feral)"></span><span class="n">963</span> feral</span>
+      <span class="stat"><span class="dot" style="background:var(--ghost)"></span><span class="n">409</span> ghosts</span>
+      <span class="stat"><span class="dot" style="background:var(--transferred)"></span><span class="n">449</span> transferred</span>
+      <span class="stat stray"><span class="n">1,555</span> lost strays</span>
+    </div>
+    <p class="foot">Sanity · Workflows · App SDK · Next.js · NYC Open Data</p>
+  </div>
+  <div class="map" role="img" aria-label="Map of every located pothole complaint in Queens Community Board 13, coloured by outcome"></div>
+</div>
+<script>
+  const size = new URLSearchParams(location.search).get('size') === 'yt' ? 'yt' : 'dev'
+  document.getElementById('card').classList.add(size)
+</script>
+</body>
+</html>
