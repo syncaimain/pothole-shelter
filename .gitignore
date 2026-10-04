@@ -40,3 +40,6 @@ Thumbs.db
 
 # vercel link (local)
 .vercel
+
+# copied from node_modules at build time (scripts/copy-maplibre-worker.mjs)
+web/public/maplibre

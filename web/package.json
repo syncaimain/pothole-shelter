@@ -4,8 +4,8 @@
   "type": "module",
   "description": "Next.js public site + API routes (adoption form, read-only proxies)",
   "scripts": {
-    "dev": "next dev --port 3004",
-    "build": "next build",
+    "dev": "node scripts/copy-maplibre-worker.mjs && next dev --port 3004",
+    "build": "node scripts/copy-maplibre-worker.mjs && next build",
     "start": "next start --port 3004",
     "typecheck": "tsc -p .",
     "export:fallback": "node scripts/export-fallback.ts",
@@ -15,6 +15,7 @@
     "@pothole/sync": "workspace:*",
     "@sanity/client": "^8.9.0",
     "@sanity/workflow-engine": "0.36.0",
+    "maplibre-gl": "6.11.2",
     "next": "16.3.8",
     "react": "^19.2.2",
     "react-dom": "^19.2.2"

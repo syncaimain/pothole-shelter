@@ -287,3 +287,17 @@ export async function getApprovedNotes(petId: string): Promise<ApprovedNote[]> {
     return [] // Notes are a nicety; the pet page never fails because of them.
   }
 }
+
+// --- Map ---------------------------------------------------------------------------------
+
+export async function getMapPoints(): Promise<Loaded<{lat: number; lng: number; name: string; slug: string; outcome: string}[]>> {
+  'use cache'
+  cacheLife('minutes')
+  return load(
+    () =>
+      client.fetch(
+        `*[_type == "pothole" && !defined(mergedInto) && hasCoordinates == true && defined(location)]{"lat": location.lat, "lng": location.lng, name, "slug": slug.current, outcome}`,
+      ),
+    (s) => s.listed!.filter((p) => p.location).map((p) => ({lat: p.location!.lat, lng: p.location!.lng, name: p.name, slug: p.slug, outcome: p.outcome})),
+  )
+}

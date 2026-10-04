@@ -11,6 +11,7 @@ export const metadata = {
 
 const NAV = [
   ['/', 'Gallery'],
+  ['/map', 'Map'],
   ['/strays', 'Lost strays'],
   ['/ghosts', 'Ghost hall'],
   ['/sync', 'Sync log'],

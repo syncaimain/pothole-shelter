@@ -4,6 +4,7 @@ import {Suspense} from 'react'
 import {getApprovedNotes, getPet} from '@/lib/data'
 import {day, floating, outcomeDescription, street} from '@/lib/format'
 import {OutcomeBadge, SnapshotNotice, StrayBadge, Timeline} from '../../components'
+import {ShelterMap} from '../../map/ShelterMap'
 
 export default function PetPage({params}: {params: Promise<{slug: string}>}) {
   return (
@@ -64,6 +65,10 @@ async function Pet({params}: {params: Promise<{slug: string}>}) {
           )}
         </dd>
       </dl>
+
+      {pet.location && (
+        <ShelterMap points={[{lat: pet.location.lat, lng: pet.location.lng, name: pet.name, slug: pet.slug, outcome: pet.outcome}]} height={260} zoom={15} />
+      )}
 
       {canAdopt && (
         <p>
