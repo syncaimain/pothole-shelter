@@ -185,3 +185,12 @@ BLOCKED_ON: none.
 ## 2026-10-04T16:20Z — agent
 STATE: README added with CI + sync badges (both render "passing"); fallback snapshot refreshed (2,512 pets); site redeployed to production and re-checked (all pages 200, current workflow status text).
 BLOCKED_ON: none. Note: the first scheduled hourly sync had not yet recorded a run at 16:20Z; GitHub often delays a newly added schedule. The /sync page shows actual run times, so this stays visible.
+
+## 2026-10-04T17:15Z — agent
+STATE: Map, Playwright judge-path + axe tests (26, desktop and mobile) and ESLint are all in CI and green. The adoption form, Shelter Office, workflows and cluster review are deployed. Backfills are partway (~390/981 lifecycle instances, ~76/366 cluster reviews).
+BLOCKED_ON: Owner — approve one adoption note in the Shelter Office (judge path step 4 needs a person).
+
+**Process note for the build log: two copies of this session ran at once.** After an interruption, the same session (`1d4d59d3…`) was resumed in a terminal while the desktop copy kept working, and both edited the working tree. Symptoms: files changing underfoot, a commit (020780a) neither copy reported at the time, and a dev server restarted under me. Identified from the process list (`claude.exe --resume 1d4d59d3…`). The owner chose to keep one copy. Nothing was lost:
+- Every change from the terminal copy was committed and pushed (04aec70 map, 1c63ca8 Playwright/axe, a5fbe2d ESLint). CI is green on all three.
+- The lifecycle claim lock (optimistic `ifRevisionID`) meant the two copies' backfills never created duplicate instances: 0 failures across both.
+- The map's `maplibre-gl` was pinned to 6.11.2: 6.12.0 (less than a day old) broke the build with "Export default doesn't exist in target module" and installed only by exempting pnpm's minimum-release-age policy. Without the exemption the policy resolved 6.11.2, which builds. The supply-chain guard was right.
