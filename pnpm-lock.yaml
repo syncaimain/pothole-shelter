@@ -281,6 +281,12 @@ importers:
       '@sanity/workflow-cli':
         specifier: 0.36.0
         version: 0.36.0(@sanity/cli-core@3.8.1(@noble/hashes@2.4.0)(@types/node@24.19.1)(vitest@5.0.3(@types/node@24.19.1)(jsdom@29.1.1(@noble/hashes@2.4.0))(vite@8.3.2(@types/node@24.19.1)(jiti@2.7.0)(yaml@2.9.1)))(yaml@2.9.1))(@sanity/workflow-blueprint@0.36.0(@sanity/workflow-engine@0.36.0(@types/react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(typescript@6.0.3))(@sanity/workflow-engine@0.36.0(@types/react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.0)
+      '@sanity/workflow-engine-test':
+        specifier: 0.36.0
+        version: 0.36.0(@sanity/workflow-engine@0.36.0(@types/react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(supports-color@8.1.1)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@24.19.1)(jsdom@29.1.1(@noble/hashes@2.4.0))(vite@8.3.2(@types/node@24.19.1)(jiti@2.7.0)(yaml@2.9.1))
 
 packages:
 
@@ -1899,6 +1905,9 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
+  '@sanity-labs/client-fake-for-test@0.12.0':
+    resolution: {integrity: sha512-acN8tCdCxWDWWjH6g61OSS9puLXVpzk0VKTkUVfWZomGGSZMfyrYqSvINmfo8DfUiLqxcimUxpVmZaS5e8D2ng==}
+
   '@sanity-labs/design-tokens@0.0.2-alpha.5':
     resolution: {integrity: sha512-RwbH9JYJTfXm/h/pgH80CeF8B94EA7+oI4K84iNVtZFNhNAsFsjLP3OFiY3jQsmKwUZIIzJJPyuY6zYQEF7h2A==}
     engines: {node: '>=20.19 <22 || >=22.12'}
@@ -2233,6 +2242,12 @@ packages:
     peerDependencies:
       '@sanity/cli-core': ^3.6.0
       '@sanity/workflow-blueprint': 0.36.0
+      '@sanity/workflow-engine': 0.36.0
+
+  '@sanity/workflow-engine-test@0.36.0':
+    resolution: {integrity: sha512-gZz4EoiqEPCz6ZU4N/xQbwmD6lAm4NybpkDQwTPCHBRpCgceAqeMqTNHAqmIAztastpyG4upaUNIk6D2BodRkw==}
+    engines: {node: '>=20'}
+    peerDependencies:
       '@sanity/workflow-engine': 0.36.0
 
   '@sanity/workflow-engine@0.32.0':
@@ -6476,6 +6491,12 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
+  '@sanity-labs/client-fake-for-test@0.12.0(supports-color@8.1.1)':
+    dependencies:
+      groq-js: 1.30.3(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
   '@sanity-labs/design-tokens@0.0.2-alpha.5': {}
 
   '@sanity-labs/oclif-plugin-skills-flag@0.2.1(@oclif/core@4.14.0)':
@@ -7210,6 +7231,14 @@ snapshots:
       ora: 9.4.1
     transitivePeerDependencies:
       - react
+
+  '@sanity/workflow-engine-test@0.36.0(@sanity/workflow-engine@0.36.0(@types/react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(supports-color@8.1.1)':
+    dependencies:
+      '@sanity-labs/client-fake-for-test': 0.12.0(supports-color@8.1.1)
+      '@sanity/id-utils': 1.1.0
+      '@sanity/workflow-engine': 0.36.0(@types/react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3)
+    transitivePeerDependencies:
+      - supports-color
 
   '@sanity/workflow-engine@0.32.0(@types/react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3)':
     dependencies:

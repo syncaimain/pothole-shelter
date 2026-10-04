@@ -1,2 +1,2 @@
-// potholeLifecycle, clusterReview, adoptionModeration definitions + tests
-export {};
+export * from './potholeLifecycle.ts'
+export * from './review.ts'

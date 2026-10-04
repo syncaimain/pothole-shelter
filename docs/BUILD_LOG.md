@@ -300,3 +300,58 @@ mapped or on that deliberate list, so new city wording can't slip through silent
 - The scheduler (GitHub Actions, hourly), and committing snapshots from CI. A full run adds ~2.3 MB of
   snapshot; incremental runs add a few KB.
 - Server-side enforcement that only the sync token changes outcomes; the bio fact guard; the model restyle.
+
+---
+
+## 2026-10-04 — Session 3: coordination protocol, Workflows spike
+
+### Prompt
+
+> New coordination protocol … append one entry to docs/REPORT.md … commit and push everything
+> outstanding, and continue with whatever is unblocked. Do not idle waiting for a reply.
+
+### Reconciling the cross-project findings (GUIDANCE F1–F31)
+
+- **F5 contradicted what I had recorded.** The owner had said the plan was Growth 50k; F5 says it's a Growth **trial** with 10k.
+  Live count: **10,022 documents**, and the writes past 10,000 succeeded, so the cap is soft or enforced later. The tokens can't
+  read the org plan (401/404). Escalated in REPORT; nothing that adds documents runs until it's answered.
+- F18 said "pin TS to 5.x". I'd already shown 6.0.3 is the only version satisfying both `typescript-eslint` and
+  `@sanity/workflow-blueprint`, so I kept 6.0.3 and said so rather than silently choosing.
+- F16 named `@sanity/workflow-engine-test`, the in-memory test bench I'd logged as missing from the docs.
+
+### Workflows spike (spec: 2-hour timebox, fallback ready): **succeeded locally**
+
+- Sources: the package READMEs, `DATAMODEL.md` and the shipped `.d.ts` (2,352 lines for `define`), plus the live
+  getting-started page. For a 0.x API the shipped types beat any blog post.
+- Three definitions (`workflows/src`): `pothole-lifecycle`, `cluster-review`, `adoption-moderation`.
+  `sanity-workflows deploy --check` → "3 definition(s) passed validation". **20 bench tests** pass.
+- `defineWorkflow`'s validator is excellent: it rejected a probe with "activity has no path to a terminal
+  status … the stage's `$allActivitiesDone` gate would wedge". `startInstance` rejected an untyped initial
+  field with "feralAt (undefined) has the wrong kind; expected datetime".
+- The Feral rule is a `$now` transition. The bench owns the clock (`setNow` + `tick`), so the test proves the
+  pet stays in the shelter at 60 days minus one second and turns feral at exactly 60 days.
+- **Departure from the spec:** I added an `unmapped` stage. Otherwise a closed-but-unmapped pet stays "open" in
+  the engine and the clock would wrongly turn it feral.
+
+### Where it got stuck: the person-only gate that gated nothing
+
+The prompt that failed was my own assumption. I wrote `filter: '$actor.kind == "person"'` for "only a person
+approves". The first test run looked fine for people, but the "an agent cannot approve" tests failed with a
+*different* error (an invalid id format), which meant the filter had **let the agent through**.
+
+A probe with three actor kinds showed the engine stamps **every** resolved actor as `kind: "person"`, robot
+tokens included. The docs half-say this ("the engine always resolves it from the client's token; there is no way
+to pass or synthesize one"). The real discriminator is the id namespace (`g…` user, `p-…` robot; DATAMODEL
+Model 4). Fixed gate: `!string::startsWith($actor.id, "p-")`.
+
+The lesson for the post: **my test fixtures used fake ids (`p-staff` for a person!) that happened to look
+like robots, which hid the bug.** Realistic fixtures matter as much as assertions. Every refusal test now
+asserts the specific "action filter returned false" error, so it can't pass for the wrong reason.
+
+### Consequences discovered
+
+- **Workflow instances live in the dataset as documents.** One per pet is ~2,500 more, which feeds the cap question.
+- **`$now` transitions need a ticker.** The CLI expects a scheduled heartbeat function, and says it runs hourly on
+  Growth and daily on Free. Recommendation: the hourly sync ticks open instances itself.
+- **Engine gates are advisory twice over:** the actor is "provenance, not an authenticated principal", and
+  mutation guards are "not enforced by the lake yet". Server routes must enforce who changes outcomes and who approves.
