@@ -50,3 +50,4 @@ web/playwright-report
 
 # walkthrough video: local editing source, uploaded to DEV/YouTube, not committed
 docs/media/video/*.webm
+docs/media/video/*.mp4

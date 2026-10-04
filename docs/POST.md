@@ -53,7 +53,7 @@ The rule I never broke: **nothing about a pet is made up, and nothing about its 
 
 **Live:** https://pothole-shelter.vercel.app (no login anywhere on the public site)
 
-[VIDEO: 2–3 minute walkthrough with voiceover — upload docs/media/video/walkthrough.webm (plus your Shelter Office clip), then embed it here]
+[VIDEO: upload docs/media/video/pothole-shelter-demo.mp4 (2:43, the walkthrough with the Shelter Office approval spliced in at 2:18) to YouTube with docs/media/video/captions.srt as its captions, then embed the link here]
 
 **The judge path:**
 1. Open the [gallery](https://pothole-shelter.vercel.app/?outcome=feral&age=years) and click a Feral pet.

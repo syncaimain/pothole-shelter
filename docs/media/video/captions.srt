@@ -1,0 +1,71 @@
+1
+00:00:02,000 --> 00:00:05,950
+Every pet here is a real pothole complaint filed with NYC 311 in Queens Community Board 13 — 2,512 of them.
+
+2
+00:00:06,000 --> 00:00:10,950
+Their fates follow the city record: adopted when DOT repairs them, ghosts when nobody finds them, feral when they wait more than 60 days.
+
+3
+00:00:11,000 --> 00:00:16,950
+Feral of the week is picked by the calendar, not by merit. This one has been waiting since the date on its record.
+
+4
+00:00:17,000 --> 00:00:28,950
+Filter by outcome and age. Hundreds of complaints have been open for over a year: that is the real backlog.
+
+5
+00:00:29,000 --> 00:00:33,950
+A pet page: name, temperament and a bio. The bio may only restate facts from the record; Gemini restyles it and a fact guard rejects any changed date, number or street.
+
+6
+00:00:34,000 --> 00:00:39,950
+Location is rounded to about 100 metres. No house numbers, ever.
+
+7
+00:00:40,000 --> 00:00:46,950
+The status timeline: every change cites the complaint field that caused it. The sync is the only thing that can change an outcome.
+
+8
+00:00:47,000 --> 00:00:51,950
+The complaint history is the city's record, exactly as published.
+
+9
+00:00:52,000 --> 00:01:01,950
+And here is that complaint on NYC Open Data. Nothing is invented.
+
+10
+00:01:02,000 --> 00:01:09,950
+Only 38 percent of complaints have coordinates, so the map holds fewer than half the shelter.
+
+11
+00:01:10,000 --> 00:01:23,950
+The rest are lost strays: complaints about a stretch of street between two cross streets. We list them by street instead of guessing a point.
+
+12
+00:01:24,000 --> 00:01:33,950
+The ghost hall: the city inspected and didn't find the reported problem. Not anyone's fault — potholes get patched, or move on.
+
+13
+00:01:34,000 --> 00:01:48,950
+Anyone can leave a pet an adoption note. It is filtered, rate-limited, and stored privately.
+
+14
+00:01:49,000 --> 00:01:55,950
+It starts an adoption-moderation workflow and waits. Nothing a visitor types is public until a person approves it in the Shelter Office.
+
+15
+00:01:56,000 --> 00:02:06,950
+The sync log: last sync time, every run, and the unmapped phrases we refuse to guess.
+
+16
+00:02:07,000 --> 00:02:17,950
+The public mirror of the Shelter Office, with live workflow state: a lifecycle instance for every open pet, and the review queues.
+
+17
+00:02:18,000 --> 00:02:30,700
+In the Shelter Office, a signed-in person approves the note. The workflow records who decided, and only then does the note appear on the pet’s page.
+
+18
+00:02:33,700 --> 00:02:38,700
+Raw records stay untouched, pet fields live separately, and every fate is the city’s own. Celebrate the repairs.
