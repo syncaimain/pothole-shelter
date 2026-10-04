@@ -13,7 +13,8 @@
     "seed:mappings": "node --env-file-if-exists=../.env.local seed_mappings.ts",
     "measure:clusters": "node measure_clusters.ts",
     "migrate:events": "node --env-file-if-exists=../.env.local migrate_events_to_array.ts",
-    "write:clusters": "node --env-file-if-exists=../.env.local write_clusters.ts"
+    "write:clusters": "node --env-file-if-exists=../.env.local write_clusters.ts",
+    "abort:orphans": "node --env-file-if-exists=../.env.local abort_orphan_instances.ts"
   },
   "dependencies": {
     "@pothole/sync": "workspace:*",

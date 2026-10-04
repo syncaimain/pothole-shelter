@@ -301,3 +301,17 @@ export async function getMapPoints(): Promise<Loaded<{lat: number; lng: number; 
     (s) => s.listed!.filter((p) => p.location).map((p) => ({lat: p.location!.lat, lng: p.location!.lng, name: p.name, slug: p.slug, outcome: p.outcome})),
   )
 }
+
+// --- Workflow state (server-side proxy) -----------------------------------------------------
+
+export async function getWorkflowState(): Promise<import('./server').WorkflowState | null> {
+  'use cache'
+  cacheLife('minutes')
+  try {
+    if (process.env.SHELTER_FORCE_SNAPSHOT === '1') return null
+    const {readWorkflowState} = await import('./server')
+    return await readWorkflowState()
+  } catch {
+    return null // the page says workflow state is unavailable rather than inventing it
+  }
+}

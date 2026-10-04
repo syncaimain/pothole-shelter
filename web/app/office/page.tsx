@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {Suspense} from 'react'
 import {OUTCOMES} from '@pothole/sync/domain'
-import {getMappings, getOffice, getStats, getSyncStatus} from '@/lib/data'
+import {getMappings, getOffice, getStats, getSyncStatus, getWorkflowState} from '@/lib/data'
 import {dateTime, outcomeTitle, plural} from '@/lib/format'
 import {OutcomeBadge, SnapshotNotice} from '../components'
 
@@ -23,7 +23,7 @@ export default function OfficePage() {
 }
 
 async function Office() {
-  const [office, stats, sync, maps] = await Promise.all([getOffice(), getStats(), getSyncStatus(), getMappings()])
+  const [office, stats, sync, maps, wf] = await Promise.all([getOffice(), getStats(), getSyncStatus(), getMappings(), getWorkflowState()])
   const unmappedPets = maps.data.unmapped.reduce((n, u) => n + u.pets.length, 0)
   return (
     <>
@@ -36,7 +36,7 @@ async function Office() {
             after a person approves them.
           </li>
           <li>
-            <strong>Adoption moderation:</strong> {plural(office.data.submittedAdoptions, 'note')} awaiting a person. Note text stays
+            <strong>Adoption moderation:</strong> {wf ? plural(wf.pendingNotes, 'note') : 'Notes'} awaiting a person. Note text stays
             hidden until approved.
           </li>
           <li>
@@ -44,6 +44,38 @@ async function Office() {
             <Link href="/sync#unmapped">See them</Link>
           </li>
         </ul>
+      </section>
+
+      <section aria-labelledby="workflows">
+        <h2 id="workflows">Workflows</h2>
+        {wf ? (
+          <>
+            <p>
+              Live instances of the three Sanity Workflows definitions, by stage. Read through a server-side proxy: instance
+              documents are private, so only these totals are published.
+            </p>
+            <ul>
+              {Object.entries(wf.live).map(([definition, stages]) => (
+                <li key={definition}>
+                  <strong>{definition}</strong>:{' '}
+                  {Object.entries(stages)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([stage, n]) => `${n.toLocaleString('en-US')} ${stage}`)
+                    .join(' · ')}
+                  {wf.completed[definition] ? ` · ${wf.completed[definition]!.toLocaleString('en-US')} finished` : ''}
+                </li>
+              ))}
+            </ul>
+            {wf.aborted > 0 && (
+              <p className="small muted">
+                {plural(wf.aborted, 'instance')} aborted with a recorded reason (duplicates from an interrupted backfill; see the build
+                log).
+              </p>
+            )}
+          </>
+        ) : (
+          <p>Workflow state is unavailable right now.</p>
+        )}
       </section>
 
       <section aria-labelledby="health">
