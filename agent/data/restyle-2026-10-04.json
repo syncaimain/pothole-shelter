@@ -1,12 +1,67 @@
 {
   "model": "gemini-3.7-flash (version 3.7-flash-08-2026)",
-  "generatedAt": "2026-10-04T17:24:31.512Z",
-  "attempted": 6,
-  "accepted": 6,
+  "generatedAt": "2026-10-04T17:29:52.625Z",
+  "attempted": 65,
+  "accepted": 65,
   "rejected": 0,
   "results": [
     {
       "pet": "pothole-70606384",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70565793",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70592564",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70386119",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70620906",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70283801",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70586251",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70586249",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70624082",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70133745",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70591037",
+      "outcome": "shelter",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70240856",
       "outcome": "shelter",
       "accepted": true
     },
@@ -16,7 +71,117 @@
       "accepted": true
     },
     {
-      "pet": "pothole-68658968",
+      "pet": "pothole-68931621",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-65212132",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-53879953",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-67500005",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69937871",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68888907",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-67832764",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-65864664",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-65826080",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-67554584",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-60885769",
+      "outcome": "feral",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68952324",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69631280",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68993462",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69452074",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69718452",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69837392",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70024826",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69504088",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68923122",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69226640",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68590823",
+      "outcome": "adopted",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69160014",
       "outcome": "adopted",
       "accepted": true
     },
@@ -26,12 +191,142 @@
       "accepted": true
     },
     {
+      "pet": "pothole-68840520",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68962729",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69207357",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70204521",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69492403",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69963323",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69033569",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69247390",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70484657",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68974479",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68612322",
+      "outcome": "ghost",
+      "accepted": true
+    },
+    {
       "pet": "pothole-69967387",
       "outcome": "transferred",
       "accepted": true
     },
     {
+      "pet": "pothole-70026287",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68704018",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68666495",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68669685",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68827030",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68701086",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-69508193",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70091600",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-70209996",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68618453",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68684870",
+      "outcome": "transferred",
+      "accepted": true
+    },
+    {
       "pet": "pothole-68666493",
+      "outcome": "unmapped",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68600484",
+      "outcome": "unmapped",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68847399",
+      "outcome": "unmapped",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68744935",
+      "outcome": "unmapped",
+      "accepted": true
+    },
+    {
+      "pet": "pothole-68676386",
       "outcome": "unmapped",
       "accepted": true
     }

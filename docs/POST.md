@@ -116,6 +116,9 @@ The spec marked a lot as "Verify", and that turned out to be right:
 - **I said "nothing was written" when something was.** When a migration step was interrupted, the tool reported the call as
   rejected, and I told the project owner nothing had been appended. It had. I found it on the next run, corrected the record
   in the report, and changed how I work: check the data before stating what didn't happen.
+- **Three different pets were all called "Arepa Asphaltine".** 800 base names for 2,512 pets. I only noticed by *reading*
+  the first Gemini bios instead of trusting that they had passed the guard. Pets sharing a base name now take pedigree
+  ordinals (Arepa Asphaltine II, III…) in complaint-key order: 2,512 distinct names, and a newer pet never renames an older one.
 - **Stopping a shell doesn't stop its process.** Two long backfills were cut off at a time limit, but their Node processes
   kept running and raced the re-runs, creating 183 duplicate workflow instances. I traced them by timestamp, added an
   optimistic-lock claim (`ifRevisionID`) so it can't recur, and **aborted** the duplicates through the engine with a recorded

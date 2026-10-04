@@ -444,3 +444,87 @@ on cross-resource reads, so the real deploy will use `sanity login`.
 - No adoption form yet. It needs creates, which are blocked.
 - No Playwright/axe run yet. The site uses semantic HTML, a skip link, visible focus and works without JavaScript,
   but that is not the same as a measured zero-violation result.
+
+---
+
+## 2026-10-04 — Session 5: going live, then "build all"
+
+### Going live
+
+- **Quota cleared** on its own: creates were refused at 5,030 documents with `documentLimitExceededError`, then accepted a few
+  hours later. The meter lagged behind the migration. The first sync afterwards added 9 complaints and 14 events, and the
+  next one changed nothing.
+- **Before making the repo public,** I searched all 11 commits for the *exact values* of the 6 secrets in `.env.local`:
+  0 occurrences. Actions secrets were set via stdin, so values were never printed.
+- **Vercel is on Hobby,** confirming that crons there are daily-only. The hourly sync runs on GitHub Actions. Site:
+  pothole-shelter.vercel.app. Studio: pothole-shelter.sanity.studio.
+- **The Workflows deploy refused `roles: ['pothole-sync']`** ("unknown project roles"): the CLI checks role names against the
+  project. The owner said to choose what's best, so the lifecycle's record-outcome gate became an id-namespace filter
+  (robot tokens only), the same technique as the person gate.
+- **The `pnpm` shim broke** when the session moved to the desktop app (it pointed at an Anaconda path). Every command since
+  runs `node …/pnpm/bin/pnpm.mjs`.
+
+### Adoption notes: private until a person approves
+
+- **Problem:** the dataset is public-read, so a submitted note stored as a normal document is public immediately.
+- **Fix:** turn the dotted-ID behaviour that hid our system docs into a feature. Pending notes are `pending.adoption-<uuid>`.
+  A probe confirmed 0 visible anonymously and 1 with a token, and the engine accepts the dotted id as a workflow subject.
+  Only a person's approval writes the public `adoption-<uuid>` copy.
+- **Abuse limits:** a hashed-IP rate limit (3 per visitor and 60 site-wide per hour), a honeypot, and filters for links,
+  emails, phone numbers and contempt. Tested in the browser pane: the link was refused, then a valid note returned
+  "awaiting moderation" and started an `adoption-moderation` instance.
+- **The public filter** shows only notes whose `moderatedBy` is a person id (`g…`). A robot "approval" stays invisible.
+
+### Shelter Office (App SDK)
+
+Deployed to the org Dashboard on port 3337 (the assigned port, avoiding the SDK default of 3333 that other builds may use).
+Approving fires the workflow as the signed-in person. The code then reads **who the engine recorded as the decider**, which
+comes from the person's token and can't be typed in, and writes the public copy only if that is a person.
+**Not yet verified end to end:** it needs a human signed in to the org to click Approve.
+
+### Workflows actually running
+
+- **Request budget:** the trial allows ~250k requests a month, so ticking all ~980 instances hourly (~700k a month) was out.
+  The planner computes only the needed operations: start, record outcome, tick newly-feral pets.
+- **Bootstrap:** the first trial of 3 cascaded straight to `feral`, matching the pets. All 981 open pets now have an
+  instance, and `/office` cross-checks it: **963 feral + 18 shelter instances = the pets' own outcomes.**
+- **366 cluster proposals** were written, each with a `cluster-review` instance. Merges happen only when a person id approves:
+  the survivor takes every member, the others are marked `mergedInto` (history kept), and an outcome change is recorded as
+  a `clusterMerge` event. 4 tests cover it.
+
+### Where it got stuck: stopping a shell doesn't stop its process
+
+The instance count came out at 1,531 instead of 1,348. The extra 183 all started between 16:38 and 16:53 UTC, and every
+one had a twin that was referenced. Cause: a backfill killed at the 10-minute background limit, and another stopped with
+TaskStop, **kept running as Node processes** after their shells died, racing the re-runs started from the terminal.
+
+Fixes:
+- **An optimistic-lock claim** (`ifRevisionID`) before every start, with abandoned claims retried after 15 minutes. Tested.
+- **A resumable cluster writer:** a decision written without its instance gets one next time.
+- **The 183 duplicates were aborted through the engine with a recorded reason,** not deleted. 183/183, 0 failed.
+
+The lesson for the post: when you interrupt automation, check what is *still running*, not only what was printed.
+
+### Other things a test or a look caught
+
+- **Hourly lifecycle work didn't fit the hourly job.** The engine manages about 7 operations a minute, so the GitHub job
+  (15-minute timeout) could never finish 400. Now: 40 per run, a 25-minute timeout, and the backlog drains across runs.
+- **The map rendered blank.** MapLibre 6 parses tiles in a module worker the bundler didn't emit (the console showed
+  "non-JavaScript MIME type"). The worker and its shared chunk are now copied from the installed package at build time.
+  Separately, **pnpm 12's supply-chain policy silently resolved 6.11.2** instead of the requested 6.12.0 and rewrote
+  `package.json`.
+- **axe found a real issue:** on phones the sync tables scroll sideways, but the scroll region wasn't keyboard-focusable.
+  Fixed; 26/26 Playwright judge-path + axe tests now pass on desktop and mobile, in CI.
+- **The `/office` mirror counted pending notes with the anonymous client,** so it always said 0. It now uses a server-side
+  proxy that publishes totals only (no ids, no text).
+- **Three different pets were all "Arepa Asphaltine".** 800 base names for 2,512 pets. Pets sharing a base name now take
+  pedigree ordinals (II, III…) in complaint-key order: 2,512 names for 2,512 pets, and a newer pet never renames an older one.
+  I found it by *reading* the first Gemini bios rather than trusting that they passed the guard.
+
+### Gemini bios behind a fact guard
+
+- **Model:** `gemini-3.7-flash`, version `3.7-flash-08-2026`, pinned per F21. The generate response names only the id, so the
+  dated version comes from the models endpoint and is stored on every bio.
+- **The guard** accepts a restyle only if every date, number and street appears in the fact template, the city's quoted
+  note survives word for word, and nothing mocks residents or crews. 8 tests, including the spec's wrong-date rejection.
+- **Reasoning still eats output:** a two-letter reply used 80 reasoning tokens. Bios get a 4,096-token budget.
