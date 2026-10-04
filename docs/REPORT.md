@@ -163,3 +163,12 @@ BLOCKED_ON: Sanity quota meter (creates still refused; owner checking Manage). g
 ## 2026-10-04T15:10Z — agent
 STATE: Sanity accepts creates again. Live sync ran: incremental, fetched 41, created 9, 14 status events. An immediate second run: fetched 5, created 0, updated 0, events 0. Snapshots committed locally.
 BLOCKED_ON: Owner, for the push (gh `workflow` scope), making the repo public, Actions secrets, and `sanity login` for the Workflows deploy. Also: since the session moved to the desktop app, the `pnpm` shim resolves to a missing anaconda path; I'm running scripts with `node` directly.
+
+## 2026-10-04T15:30Z — agent
+STATE: Live. Site at https://pothole-shelter.vercel.app (public, no login wall), Studio at https://pothole-shelter.sanity.studio, repo public at github.com/syncaimain/pothole-shelter, CI green, hourly sync on GitHub Actions (first dispatched run succeeded end to end, including the snapshot commit).
+BLOCKED_ON: Owner — finishing `sanity login` (terminal tab c2) so I can deploy the Workflows definitions from that session (F38).
+
+- Before making the repo public, I scanned every commit (11) for the exact values of all 6 secrets in `.env.local`: 0 occurrences. Only the project ID and dataset name appear, and both are public by design.
+- Actions secrets set from `.env.local` via stdin (values never printed): `SANITY_API_WRITE_TOKEN`, `SOCRATA_APP_TOKEN`.
+- Vercel account is on **Hobby**, confirming crons there would be daily-only. GitHub Actions `17 * * * *` is the hourly scheduler. Project `pothole-shelter`, root `web/`, Node 24.x.
+- The `pnpm` bash shim is broken in the desktop-app shell (it points at an anaconda path); I'm running `node .../pnpm/bin/pnpm.mjs` directly.
