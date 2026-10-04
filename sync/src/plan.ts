@@ -1,5 +1,5 @@
 import {ids, type Outcome} from './domain.ts'
-import {initialHistory, transitionEvent, type StatusEventDoc} from './events.ts'
+import {initialHistory, transitionEvent, type StatusEvent} from './events.ts'
 import {hashOf, sameData} from './hash.ts'
 import type {ResolutionMapping} from './mapping.ts'
 import {createdAt, isClosed} from './outcome.ts'
@@ -25,23 +25,25 @@ export interface BioMeta {
   generatedAt?: string
 }
 
-export type StoredPet = {_id: string; bio?: string; bioMeta?: BioMeta} & Partial<PetFields>
+/** Only each event's _key is needed to avoid appending it twice. */
+export type StoredPet = {_id: string; bio?: string; bioMeta?: BioMeta; events?: Pick<StatusEvent, '_key'>[]} & Partial<PetFields>
 
 export interface SyncState {
   complaints: Map<string, ComplaintDoc>
   pets: Map<string, StoredPet>
   mappings: ResolutionMapping[]
-  eventIds: Set<string>
   /** Socrata :updated_at high-water mark from the last successful run. */
   watermark?: string
 }
 
-export type PetDoc = {_id: string; _type: 'pothole'; bio: string; bioMeta: BioMeta} & PetFields
+export type PetDoc = {_id: string; _type: 'pothole'; bio: string; bioMeta: BioMeta; events: StatusEvent[]} & PetFields
 
 export interface PetPatch {
   id: string
   set: Record<string, unknown>
   unset: string[]
+  /** Status events to append to the pet's events array. Never replaces existing entries. */
+  append: StatusEvent[]
 }
 
 export interface SyncCounts {
@@ -60,13 +62,12 @@ export interface Plan {
   complaints: ComplaintDoc[]
   petCreates: PetDoc[]
   petPatches: PetPatch[]
-  events: StatusEventDoc[]
   counts: SyncCounts
   watermark?: string
 }
 
 export const isEmptyPlan = (p: Plan) =>
-  p.complaints.length + p.petCreates.length + p.petPatches.length + p.events.length === 0
+  p.complaints.length + p.petCreates.length + p.petPatches.length === 0
 
 const PET_FIELD_KEYS: (keyof PetFields)[] = [
   'name', 'slug', 'temperament', 'outcome', 'complaints', 'complaintCount', 'firstReportedAt',
@@ -145,7 +146,6 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
   // 3. Recompute every pet (the 60-day rule needs that even when no record changed).
   const petCreates: PetDoc[] = []
   const petPatches: PetPatch[] = []
-  const events: StatusEventDoc[] = []
   for (const [petId, memberIds] of members) {
     if (memberIds.length === 0) continue
     const complaints = memberIds
@@ -158,9 +158,10 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
     const stored = state.pets.get(petId)
     const templateMeta: BioMeta = {source: 'template', guardPassed: true, factsHash: derived.factsHash}
     if (!stored) {
-      petCreates.push({_id: petId, _type: 'pothole', ...derived.fields, bio: derived.bio, bioMeta: templateMeta})
-      events.push(...initialHistory(petId, complaints[0]!.raw, derived, runId))
+      const history = initialHistory(petId, complaints[0]!.raw, derived, runId)
+      petCreates.push({_id: petId, _type: 'pothole', ...derived.fields, bio: derived.bio, bioMeta: templateMeta, events: history})
       counts.petsCreated++
+      counts.statusEvents += history.length
       continue
     }
 
@@ -180,18 +181,21 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
       set.bio = derived.bio
       set.bioMeta = templateMeta
     }
-    if (Object.keys(set).length || unset.length) {
-      petPatches.push({id: petId, set, unset})
-      counts.petsUpdated++
-    }
-
+    // Outcome changes are recorded by appending to the pet's own event array, in the same
+    // patch that changes the outcome, so the two can never disagree.
+    const append: StatusEvent[] = []
     if (stored.outcome && stored.outcome !== derived.fields.outcome) {
       const petChanges = memberIds.map((id) => changed.get(id)).filter((c) => !!c)
-      events.push(transitionEvent(petId, stored.outcome as Outcome, derived, petChanges, now, runId))
+      const e = transitionEvent(petId, stored.outcome as Outcome, derived, petChanges, now, runId)
+      if (!(stored.events ?? []).some((x) => x._key === e._key)) append.push(e)
+    }
+
+    if (Object.keys(set).length || unset.length || append.length) {
+      petPatches.push({id: petId, set, unset, append})
+      counts.petsUpdated++
+      counts.statusEvents += append.length
     }
   }
 
-  const newEvents = events.filter((e) => !state.eventIds.has(e._id))
-  counts.statusEvents = newEvents.length
-  return {complaints: complaintWrites, petCreates, petPatches, events: newEvents, counts, watermark}
+  return {complaints: complaintWrites, petCreates, petPatches, counts, watermark}
 }

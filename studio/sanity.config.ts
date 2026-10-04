@@ -6,7 +6,7 @@ import {structure} from './structure'
 // Types only the sync writes. Hiding "create" keeps people from hand-making records
 // that should come from the city data. (Write tokens can still bypass the Studio;
 // the server-side checks are what actually enforce this.)
-const SYNC_OWNED = new Set(['complaint311', 'pothole', 'statusEvent', 'syncRun', 'clusterDecision', 'adoption'])
+const SYNC_OWNED = new Set(['complaint311', 'pothole', 'syncRun', 'clusterDecision', 'adoption'])
 
 export default defineConfig({
   name: 'pothole-shelter',

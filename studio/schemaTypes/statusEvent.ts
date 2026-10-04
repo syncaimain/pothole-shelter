@@ -3,14 +3,17 @@ import {OUTCOMES} from '@pothole/sync/domain'
 
 const outcomeList = [{value: 'reported', title: 'Reported'}, ...OUTCOMES.map(({value, title}) => ({value, title}))]
 
-/** One change to a pet's outcome, citing the city-record change that caused it. Written only by the sync. */
+/**
+ * One change to a pet's outcome, citing the city-record change that caused it. Embedded in
+ * pothole.events rather than stored as its own document: per-event documents (4,992) put the
+ * dataset over its 10,000-document cap. Written only by the sync, which only appends.
+ */
 export const statusEvent = defineType({
   name: 'statusEvent',
   title: 'Status event',
-  type: 'document',
+  type: 'object',
   readOnly: true,
   fields: [
-    defineField({name: 'pothole', type: 'reference', to: [{type: 'pothole'}]}),
     defineField({name: 'from', type: 'string', options: {list: outcomeList}}),
     defineField({name: 'to', type: 'string', options: {list: outcomeList}}),
     defineField({name: 'at', type: 'datetime', description: 'When the city record changed, or when the time rule fired.'}),
@@ -29,8 +32,7 @@ export const statusEvent = defineType({
     defineField({name: 'syncRun', type: 'reference', to: [{type: 'syncRun'}], weak: true}),
   ],
   preview: {
-    select: {name: 'pothole.name', from: 'from', to: 'to', at: 'at'},
-    prepare: ({name, from, to, at}) => ({title: `${name ?? '?'}: ${from} → ${to}`, subtitle: at?.slice(0, 10)}),
+    select: {from: 'from', to: 'to', at: 'at', kind: 'cause.kind'},
+    prepare: ({from, to, at, kind}) => ({title: `${from} → ${to}`, subtitle: `${at?.slice(0, 10) ?? '?'} · ${kind ?? ''}`}),
   },
-  orderings: [{title: 'Newest first', name: 'atDesc', by: [{field: 'at', direction: 'desc'}]}],
 })

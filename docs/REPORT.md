@@ -115,3 +115,23 @@ BLOCKED_ON: Owner — (1) the GitHub CLI token needs the `workflow` scope: run `
 - `ci.yml` (every push): frozen install → typecheck → all tests → snapshot checksum check → build web → build studio. **Lint is not set up yet**; the spec wants it, and it's on my list rather than faked.
 - `sync.yml`: `workflow_dispatch` only, with optional `--full`. Commits its snapshot pages. The hourly `schedule:` is present but commented out until the cap is settled. `concurrency: sync` prevents overlapping runs.
 - Action versions were checked against their latest releases today: checkout v7, setup-node v7, pnpm/action-setup v6.
+
+## 2026-10-04T13:13Z — agent
+STATE: statusEvent collapsed into `pothole.events`. Dataset at **5,030** documents (from 10,022), 0 statusEvent docs, all 4,992 events verified inside their pets. Schema redeployed. Code committed locally; 65 tests pass.
+BLOCKED_ON: Sanity — **creates are rejected with `documentLimitExceededError` ("Documents quota limit reached") despite 5,030 documents.** Deletes succeed and creates fail. Most likely the quota meter has not recomputed since we were over; I can't confirm its cadence. Owner: please check sanity.io/manage usage for the project. Until it clears, the sync can't write even its syncRun record. Also still queued: the gh `workflow` scope for 3 unpushed commits.
+
+**Correction to my 2026-10-04 answer to the owner.** I said the interrupted `--apply` had written nothing. **That was wrong.** The command ran even though the tool call came back to me as rejected. The pet arrays were written at 07:03:47–07:04:12Z. The effect was exactly the intended, verified first step: events appended, nothing deleted, document count unchanged. I discovered it because today's `--apply` reported "0 pets need appending". Lesson: after an interrupted command, check the data's state before telling anyone what didn't happen.
+
+**Workflows dry run (approved): `sanity-workflows deploy --dry-run --deployment production`. Verbatim results:**
+- No login session on this machine: `✖ Authentication required: No Sanity token found — run sanity login, or set SANITY_AUTH_TOKEN.`
+- With `SANITY_AUTH_TOKEN` (project-scoped Deploy Studio token): it reached `Diffing 3 definition(s) against fixjy07h.production…`, then `✖ Diff failed — project user not found for user ID "g-jUu7tVgy0j6s" in project "fixjy07h"`. The token's principal can't be resolved as a project user. That's an identity failure, not a feature gate.
+- With the Editor robot token (`SANITY_API_WRITE_TOKEN`; still read-only): **`✔ Diffed 3 definition(s) · production (prod) → fixjy07h.production`**, exit 0. All three definitions show as new (v1). **No enablement gate, and no role warning.**
+- Conclusion: there is no evidence of an enablement gate. That supports withdrawing F17. The real deploy should use `sanity login` (F38), not either token.
+
+**Migration** (`ingest/migrate_events_to_array.ts`): moved, not re-derived. Every key was checked against `eventKey()` (4,992/4,992), verified in place, and only then were the docs deleted.
+- **Before:** 10,022 total; statusEvent 4,992.
+- **After:** 5,030 total; statusEvent 0; 2,503 pets with events; 4,992 array entries.
+
+**Code:** the sync now appends events in the same patch that changes the outcome. Keys are content hashes, so retries can't duplicate them. New tests assert that zero event documents are written and that a re-run doesn't append twice.
+
+**The sync crashes on quota rather than recording a failed run.** Recording a failure is itself a write, so it can't. It exits non-zero, which a scheduler will notice. I'll leave this alone unless you want a local fallback for failure records.

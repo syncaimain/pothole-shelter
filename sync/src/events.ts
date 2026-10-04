@@ -18,10 +18,15 @@ export interface EventCause {
   mapping?: {_type: 'reference'; _ref: string; _weak: true}
 }
 
-export interface StatusEventDoc {
-  _id: string
+/**
+ * One entry in a pet's `events` array. Events live inside the pothole document, not as
+ * documents of their own: one document per event put the dataset over its 10,000-document
+ * cap (4,992 of 10,022). The sync only ever appends; nothing else writes this array.
+ */
+export interface StatusEvent {
+  /** Content hash of what happened. Stable across runs, so the same event is never appended twice. */
+  _key: string
   _type: 'statusEvent'
-  pothole: {_type: 'reference'; _ref: string}
   from: EventState
   to: EventState
   at: string
@@ -32,14 +37,16 @@ export interface StatusEventDoc {
 const ref = (id: string) => ({_type: 'reference' as const, _ref: id})
 const asText = (v: unknown) => (v === undefined ? undefined : typeof v === 'string' ? v : JSON.stringify(v))
 
-function event(petId: string, from: EventState, to: EventState, at: Date, cause: EventCause, runId: string): StatusEventDoc {
-  // The ID depends only on what happened, never on which run noticed it, so a rerun
-  // (or a retry after a partial failure) can never write the same event twice.
-  const key = hashOf({petId, from, to, at: toIso(at), kind: cause.kind, complaint: cause.complaint?._ref, field: cause.field}).slice(0, 20)
+/** The key depends only on what happened, never on which run noticed it, so a rerun
+ *  (or a retry after a partial failure) can never append the same event twice. It is the
+ *  same hash that ended the old per-event document IDs, so migrated events keep their keys. */
+export const eventKey = (petId: string, from: EventState, to: EventState, at: string, cause: Pick<EventCause, 'kind' | 'complaint' | 'field'>) =>
+  hashOf({petId, from, to, at, kind: cause.kind, complaint: cause.complaint?._ref, field: cause.field}).slice(0, 20)
+
+function event(petId: string, from: EventState, to: EventState, at: Date, cause: EventCause, runId: string): StatusEvent {
   return {
-    _id: `statusEvent-${petId.replace(/^pothole-/, '')}-${key}`,
+    _key: eventKey(petId, from, to, toIso(at), cause),
     _type: 'statusEvent',
-    pothole: ref(petId),
     from,
     to,
     at: toIso(at),
@@ -58,8 +65,8 @@ function closingCause(raw: RawRecord, mapping?: ResolutionMapping): EventCause {
  * A new pet's history, rebuilt from the city record: reported → in the shelter,
  * then feral at 60 days if it got that far open, then the closing outcome.
  */
-export function initialHistory(petId: string, firstRaw: RawRecord, derived: DerivedPet, runId: string): StatusEventDoc[] {
-  const out: StatusEventDoc[] = []
+export function initialHistory(petId: string, firstRaw: RawRecord, derived: DerivedPet, runId: string): StatusEvent[] {
+  const out: StatusEvent[] = []
   const reported = createdAt(firstRaw)
   if (!reported) return out
   out.push(
@@ -101,7 +108,7 @@ export function transitionEvent(
   changed: readonly {id: string; before: RawRecord; after: RawRecord}[],
   now: Date,
   runId: string,
-): StatusEventDoc {
+): StatusEvent {
   const to = derived.fields.outcome
   const deciding = derived.deciding
   const change = changed.find((c) => c.after.unique_key === deciding.unique_key) ?? changed[0]

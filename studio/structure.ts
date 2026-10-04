@@ -45,7 +45,6 @@ export const structure: StructureResolver = (S) =>
         ),
       S.divider(),
       S.documentTypeListItem('complaint311').title('311 complaints (raw, read-only)'),
-      S.documentTypeListItem('statusEvent').title('Status events'),
       S.documentTypeListItem('syncRun').title('Sync runs'),
       S.divider(),
       S.documentTypeListItem('clusterDecision').title('All cluster decisions'),

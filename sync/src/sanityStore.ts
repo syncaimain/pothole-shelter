@@ -1,5 +1,4 @@
 import {createClient, type SanityClient} from '@sanity/client'
-import type {StatusEventDoc} from './events.ts'
 import type {ResolutionMapping} from './mapping.ts'
 import type {ComplaintDoc, Plan, StoredPet} from './plan.ts'
 import type {SyncRunDoc, SyncStore} from './store.ts'
@@ -29,20 +28,18 @@ export class SanityStore implements SyncStore {
   }
 
   async loadState() {
-    const [complaints, pets, mappings, eventIds, lastGood] = await Promise.all([
+    const [complaints, pets, mappings, lastGood] = await Promise.all([
       this.client.fetch<ComplaintDoc[]>(`*[_type == "complaint311"]{_id, _type, raw, rawHash, sourceUrl, sourceUpdatedAt, firstSyncedAt, syncedAt}`),
       this.client.fetch<StoredPet[]>(
-        `*[_type == "pothole"]{_id, name, slug, temperament, outcome, complaints[]{_type, _key, _ref}, complaintCount, firstReportedAt, lastEventAt, street, crossStreet, communityBoard, location, hasCoordinates, bio, bioMeta}`,
+        `*[_type == "pothole"]{_id, name, slug, temperament, outcome, complaints[]{_type, _key, _ref}, complaintCount, firstReportedAt, lastEventAt, street, crossStreet, communityBoard, location, hasCoordinates, bio, bioMeta, "events": events[]{_key}}`,
       ),
       this.client.fetch<ResolutionMapping[]>(`*[_type == "resolutionMapping"]{_id, pattern, matchType, outcome}`),
-      this.client.fetch<string[]>(`*[_type == "statusEvent"]._id`),
       this.client.fetch<Pick<SyncRunDoc, 'watermark'> | null>(`*[_type == "syncRun" && state == "succeeded"] | order(startedAt desc)[0]{watermark}`),
     ])
     return {
       complaints: new Map(complaints.map((c) => [c._id, stripNulls(c)])),
       pets: new Map(pets.map((p) => [p._id, stripNulls(p)])),
       mappings,
-      eventIds: new Set(eventIds),
       watermark: lastGood?.watermark ?? undefined,
     }
   }
@@ -51,17 +48,17 @@ export class SanityStore implements SyncStore {
     await this.client.createOrReplace(run)
   }
 
-  /** Raw records first, then pets (which reference them), then events (which reference pets). */
+  /** Raw records first, then pets (which reference them). Events ride inside pet writes. */
   async apply(plan: Plan) {
     await this.inBatches(plan.complaints, (tx, c) => tx.createOrReplace(c))
     await this.inBatches(plan.petCreates, (tx, p) => tx.createIfNotExists(p))
-    await this.inBatches(plan.petPatches, (tx, {id, set, unset}) => {
+    await this.inBatches(plan.petPatches, (tx, {id, set, unset, append}) => {
       let patch = this.client.patch(id)
       if (Object.keys(set).length) patch = patch.set(set)
       if (unset.length) patch = patch.unset(unset)
+      if (append.length) patch = patch.setIfMissing({events: []}).append('events', append)
       return tx.patch(patch)
     })
-    await this.inBatches(plan.events, (tx, e: StatusEventDoc) => tx.createIfNotExists(e))
   }
 
   private async inBatches<T>(items: readonly T[], add: (tx: ReturnType<SanityClient['transaction']>, item: T) => unknown) {

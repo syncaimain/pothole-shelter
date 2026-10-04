@@ -1,4 +1,3 @@
-import type {StatusEventDoc} from './events.ts'
 import type {ComplaintDoc, Plan, StoredPet, SyncCounts, SyncState} from './plan.ts'
 import type {ResolutionMapping} from './mapping.ts'
 
@@ -68,7 +67,6 @@ export class MemoryStore implements SyncStore {
       complaints: new Map(this.ofType<ComplaintDoc>('complaint311').map((c) => [c._id, c])),
       pets: new Map(this.ofType<StoredPet>('pothole').map((p) => [p._id, p])),
       mappings: this.ofType<ResolutionMapping>('resolutionMapping'),
-      eventIds: new Set(this.ofType<StatusEventDoc>('statusEvent').map((e) => e._id)),
       watermark: lastGood?.watermark,
     })
   }
@@ -80,14 +78,14 @@ export class MemoryStore implements SyncStore {
   async apply(plan: Plan): Promise<void> {
     for (const c of plan.complaints) this.put(c as unknown as Doc)
     for (const p of plan.petCreates) if (!this.docs.has(p._id)) this.put(p as unknown as Doc)
-    for (const {id, set, unset} of plan.petPatches) {
+    for (const {id, set, unset, append} of plan.petPatches) {
       const doc = this.docs.get(id)
       if (!doc) throw new Error(`patch on missing document ${id}`)
       const next: Doc = {...doc, ...structuredClone(set)}
       for (const k of unset) delete next[k]
+      if (append.length) next.events = [...((next.events as unknown[]) ?? []), ...structuredClone(append)]
       this.put(next)
     }
-    for (const e of plan.events) if (!this.docs.has(e._id)) this.put(e as unknown as Doc)
   }
 
   private put(doc: Doc) {

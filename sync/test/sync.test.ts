@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import type {StatusEventDoc} from '../src/events.ts'
+import type {StatusEvent} from '../src/events.ts'
 import type {ComplaintDoc, PetDoc} from '../src/plan.ts'
 import {runSync} from '../src/run.ts'
 import {fetchPages, splitRow} from '../src/soda.ts'
@@ -11,8 +11,8 @@ const sync = (store: MemoryStore, rows: () => ReturnType<typeof allRows>, clock 
   runSync({store, fetchImpl: fakeSoda(rows).impl, clock: at(clock), full, sleep: noSleep})
 
 const pet = (store: MemoryStore, key: string) => store.docs.get(`pothole-${key}`) as unknown as PetDoc
-const eventsFor = (store: MemoryStore, key: string) =>
-  store.ofType<StatusEventDoc>('statusEvent').filter((e) => e.pothole._ref === `pothole-${key}`).sort((a, b) => a.at.localeCompare(b.at))
+const eventsFor = (store: MemoryStore, key: string) => [...((pet(store, key).events ?? []) as StatusEvent[])].sort((a, b) => a.at.localeCompare(b.at))
+const allEvents = (store: MemoryStore) => store.ofType<PetDoc>('pothole').flatMap((p) => p.events ?? [])
 
 describe('sync idempotency', () => {
   it('a second sync over the same data changes nothing', async () => {
@@ -63,6 +63,15 @@ describe('raw records stay untouched', () => {
     expect(store.docs.get('complaint311-68586622')).toEqual(before)
   })
 
+  it('keeps status events inside the pet: no event documents at all', async () => {
+    const store = storeWithMappings()
+    const run = await sync(store, allRows)
+    expect(store.ofType('statusEvent')).toEqual([])
+    expect(allEvents(store).length).toBe(run.statusEvents)
+    const types = new Set([...store.docs.values()].map((d) => d._type))
+    expect([...types].sort()).toEqual(['complaint311', 'pothole', 'resolutionMapping', 'syncRun'])
+  })
+
   it('never uses a dot in any document ID (dotted IDs are hidden from anonymous readers)', async () => {
     const store = storeWithMappings()
     await sync(store, allRows)
@@ -101,7 +110,7 @@ describe('outcomes come from mappings and the clock, never from guesses', () => 
     const feral = eventsFor(store, ROWS.feralPending!.unique_key)
     expect(feral.map((e) => `${e.from}>${e.to}`)).toEqual(['reported>shelter', 'shelter>feral'])
     expect(feral[1]!.cause.kind).toBe('timeRule')
-    for (const e of store.ofType<StatusEventDoc>('statusEvent')) expect(e.cause.complaint?._ref).toMatch(/^complaint311-/)
+    for (const e of allEvents(store)) expect(e.cause.complaint?._ref).toMatch(/^complaint311-/)
   })
 })
 
@@ -127,6 +136,7 @@ describe('changes arrive only through sync events', () => {
 
     const again = await sync(store, closed, plusDays(T0, 2))
     expect(again).toMatchObject({updated: 0, statusEvents: 0})
+    expect(eventsFor(store, key).filter((e) => e.to === 'adopted')).toHaveLength(1)
   })
 
   it('the 60-day rule turns an open pet feral on a fixed clock, with no record change', async () => {
