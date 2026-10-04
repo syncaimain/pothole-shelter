@@ -209,3 +209,7 @@ BLOCKED_ON: Owner — (1) approve one real adoption note in the Shelter Office, 
 ## 2026-10-04T20:40Z — agent
 STATE: **Judge path step 4 verified end to end, by the owner.** Two notes ("jh", "Shelter demo video") were approved in the Shelter Office by a person id (`gzFydZyee`). The engine recorded the same id as decider, both instances reached `approved`, and the public `adoption-<uuid>` copies exist. Two notes are still pending: the test note (to reject) and "Shelter demo, take two".
 BLOCKED_ON: Owner — the Shelter Office clip must be recorded by hand. Claude in Chrome can screenshot the Dashboard, but its clicks don't reach the App SDK app inside the Dashboard's cross-origin iframe: two clicks, no effect, buttons never went busy. Its element finder also hit an account rate limit. Nothing was changed by the attempt.
+
+## 2026-10-04T20:30Z — agent
+STATE: Owner-requested reset before recording the demo. The 4 test/demo adoption notes ("Claude test, please reject", "Shelter demo video", "Shelter demo, take two", "jh") and their 3 public copies were deleted, so 0 adoption docs remain. The one still-open moderation instance was aborted with a reason; finished instances are kept as history.
+BLOCKED_ON: none (owner records the moderation clip next).
