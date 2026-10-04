@@ -22,6 +22,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm -r typecheck
+      - name: Lint
+        run: pnpm lint
       - name: Unit and workflow tests
         run: pnpm -r test
       - name: Snapshot checksums match their manifests

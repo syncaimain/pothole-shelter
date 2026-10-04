@@ -105,7 +105,7 @@ export async function* fetchPages(opts: FetchOptions): AsyncGenerator<FetchedPag
     url.searchParams.set('$limit', String(pageSize))
     url.searchParams.set('$offset', String(index * pageSize))
 
-    let text = ''
+    let text!: string // assigned by every path out of the retry loop
     for (let attempt = 0; ; attempt++) {
       try {
         const res = await fetchImpl(url, {headers: appToken ? {'X-App-Token': appToken} : {}})
