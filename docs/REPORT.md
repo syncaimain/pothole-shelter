@@ -194,3 +194,14 @@ BLOCKED_ON: Owner — approve one adoption note in the Shelter Office (judge pat
 - Every change from the terminal copy was committed and pushed (04aec70 map, 1c63ca8 Playwright/axe, a5fbe2d ESLint). CI is green on all three.
 - The lifecycle claim lock (optimistic `ifRevisionID`) meant the two copies' backfills never created duplicate instances: 0 failures across both.
 - The map's `maplibre-gl` was pinned to 6.11.2: 6.12.0 (less than a day old) broke the build with "Export default doesn't exist in target module" and installed only by exempting pnpm's minimum-release-age policy. Without the exemption the policy resolved 6.11.2, which builds. The supply-chain guard was right.
+
+## 2026-10-04T20:10Z — agent
+STATE: "Build all" is complete apart from owner-only steps. Against production: 26/26 Playwright judge-path + axe tests pass. CI is green. The hourly schedule has fired on its own (19:39Z, succeeded; GitHub delayed the 19:17 slot by 22 minutes). Only one copy of this session is running now (checked the process list).
+BLOCKED_ON: Owner — (1) approve one real adoption note in the Shelter Office, and reject the test note "Claude test, please reject"; this is the only unverified part of judge path step 4; (2) Shelter Office test credentials, or "see the video"; (3) upload the walkthrough video and the agent session; (4) confirm the NYC disclaimer wording in a browser.
+
+**Done since 17:15Z (this copy and the other, now merged in history):**
+- Backfills finished. 981 lifecycle instances, which cross-check the pets exactly (963 feral + 18 shelter). 366 cluster reviews. 183 duplicate instances from the double-running backfills were aborted with a recorded reason (0 failures).
+- Gemini bios: 65 attempted, 65 accepted by the fact guard, 0 rejected (`gemini-3.7-flash`, version `3.7-flash-08-2026`). Zero rejections means the guard never fired on real output; the 8 guard tests show what it catches.
+- Unique pet names: 2,512 names for 2,512 pets (pedigree ordinals). The live re-sync after the rename was idempotent.
+- The public workflow-state proxy is on /office (totals only). docs/POST.md has been fitted to the Path Two template, with 18 screenshots and a voiceover script (docs/media/).
+- Tests: 98 unit/workflow (sync 56 · workflows 20 · agent 8 · web 11 · ingest 3) + 26 e2e.
