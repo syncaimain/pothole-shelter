@@ -19,11 +19,17 @@ async function Pet({params}: {params: Promise<{slug: string}>}) {
   const pet = loaded.data
   if (!pet) notFound()
   const place = [street(pet.street), pet.crossStreet && `near ${street(pet.crossStreet)}`].filter(Boolean).join(' ')
-  const canAdopt = pet.outcome === 'shelter' || pet.outcome === 'feral'
+  const canAdopt = !pet.mergedInto && (pet.outcome === 'shelter' || pet.outcome === 'feral')
 
   return (
     <article>
       <SnapshotNotice loaded={loaded} />
+      {pet.mergedInto && (
+        <p className="notice" role="status">
+          A person at the shelter confirmed this complaint is about the same pothole as another one, so the two pets were merged.{' '}
+          {pet.mergedIntoSlug && <Link href={`/pothole/${pet.mergedIntoSlug}`}>Meet the merged pet →</Link>}
+        </p>
+      )}
       <h1>{pet.name}</h1>
       <p className="badges">
         <OutcomeBadge outcome={pet.outcome} />

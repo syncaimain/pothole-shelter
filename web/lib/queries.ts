@@ -2,7 +2,7 @@
 // fallback exporter, so the snapshot always has exactly the shape the pages read.
 import type {Outcome} from '@pothole/sync/domain'
 
-export const CARD = `"id": _id, name, "slug": slug.current, outcome, temperament, street, crossStreet, firstReportedAt, lastEventAt, hasCoordinates, complaintCount`
+export const CARD = `"id": _id, name, "slug": slug.current, outcome, temperament, street, crossStreet, firstReportedAt, lastEventAt, hasCoordinates, complaintCount, mergedInto, "mergedIntoSlug": *[_id == ^.mergedInto][0].slug.current`
 
 export const DETAIL = `${CARD}, bio, communityBoard, location,
   "events": events[]{_key, from, to, at, cause{kind, field, oldValue, newValue, complaint}},
@@ -23,6 +23,9 @@ export interface PetCard {
   lastEventAt?: string
   hasCoordinates: boolean
   complaintCount: number
+  /** Set when a person-approved cluster merged this pet into another. */
+  mergedInto?: string
+  mergedIntoSlug?: string
 }
 
 export interface ComplaintRow {
@@ -77,6 +80,8 @@ export interface MappingRow {
 export interface FallbackSnapshot {
   exportedAt: string
   pets: PetDetail[]
+  /** pets without mergedInto: what lists and counts show. */
+  listed?: PetDetail[]
   runs: SyncRunRow[]
   mappings: MappingRow[]
 }

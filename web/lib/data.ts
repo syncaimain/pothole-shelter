@@ -21,7 +21,12 @@ export interface Loaded<T> {
 }
 
 let snapshot: Promise<FallbackSnapshot> | undefined
-const loadSnapshot = () => (snapshot ??= import('../data/fallback.json').then((m) => m.default as unknown as FallbackSnapshot))
+const loadSnapshot = () =>
+  (snapshot ??= import('../data/fallback.json').then((m) => {
+    const s = m.default as unknown as FallbackSnapshot
+    // Same rule as the live queries: merged pets are not listed (their own page still resolves).
+    return {...s, listed: s.pets.filter((p) => !p.mergedInto)}
+  }))
 
 async function load<T>(live: () => Promise<T>, fromSnapshot: (s: FallbackSnapshot) => T): Promise<Loaded<T>> {
   try {
@@ -72,7 +77,7 @@ export async function getGallery(q: GalleryQuery): Promise<Loaded<{pets: PetCard
   const bucket = q.age ? AGE_BUCKETS[q.age] : undefined
   return load(
     async () => {
-      const filters = ['_type == "pothole"']
+      const filters = ['_type == "pothole" && !defined(mergedInto)']
       if (q.outcome) filters.push('outcome == $outcome')
       if (bucket) {
         filters.push('dateTime(now()) - dateTime(firstReportedAt) >= $minS')
@@ -87,7 +92,7 @@ export async function getGallery(q: GalleryQuery): Promise<Loaded<{pets: PetCard
     },
     (s) => {
       const now = Date.now()
-      const pets = s.pets
+      const pets = s.listed!
         .filter((p) => !q.outcome || p.outcome === q.outcome)
         .filter((p) => {
           if (!bucket || !p.firstReportedAt) return !bucket
@@ -115,8 +120,8 @@ export async function getFeralOfTheWeek(): Promise<Loaded<(PetCard & {daysWaitin
     return pet && {...pet, daysWaiting: pet.firstReportedAt ? Math.floor((now - Date.parse(pet.firstReportedAt)) / 86_400_000) : undefined}
   }
   return load(
-    async () => pick(await client.fetch<PetCard[]>(`*[_type == "pothole" && outcome == "feral"] | order(firstReportedAt asc, slug.current asc){${CARD}}`)),
-    (s) => pick(s.pets.filter((p) => p.outcome === 'feral').sort((a, b) => (a.firstReportedAt ?? '').localeCompare(b.firstReportedAt ?? '') || a.slug.localeCompare(b.slug))),
+    async () => pick(await client.fetch<PetCard[]>(`*[_type == "pothole" && !defined(mergedInto) && outcome == "feral"] | order(firstReportedAt asc, slug.current asc){${CARD}}`)),
+    (s) => pick(s.listed!.filter((p) => p.outcome === 'feral').sort((a, b) => (a.firstReportedAt ?? '').localeCompare(b.firstReportedAt ?? '') || a.slug.localeCompare(b.slug))),
   )
 }
 
@@ -131,15 +136,15 @@ export async function getStats(): Promise<Loaded<{total: number; strays: number;
   return load(
     async () => {
       const r = await client.fetch<{total: number; strays: number; counts: Record<string, number>}>(
-        `{"total": count(*[_type == "pothole"]), "strays": count(*[_type == "pothole" && hasCoordinates == false]),
-          "counts": {${OUTCOMES.map((o) => `"${o.value}": count(*[_type == "pothole" && outcome == "${o.value}"])`).join(', ')}}}`,
+        `{"total": count(*[_type == "pothole" && !defined(mergedInto)]), "strays": count(*[_type == "pothole" && !defined(mergedInto) && hasCoordinates == false]),
+          "counts": {${OUTCOMES.map((o) => `"${o.value}": count(*[_type == "pothole" && !defined(mergedInto) && outcome == "${o.value}"])`).join(', ')}}}`,
       )
       return shape(r.total, r.strays, r.counts)
     },
     (s) => {
       const counts: Partial<Record<Outcome, number>> = {}
-      for (const p of s.pets) counts[p.outcome] = (counts[p.outcome] ?? 0) + 1
-      return shape(s.pets.length, s.pets.filter((p) => !p.hasCoordinates).length, counts)
+      for (const p of s.listed!) counts[p.outcome] = (counts[p.outcome] ?? 0) + 1
+      return shape(s.listed!.length, s.listed!.filter((p) => !p.hasCoordinates).length, counts)
     },
   )
 }
@@ -159,8 +164,8 @@ export async function getStrays(): Promise<Loaded<PetCard[]>> {
   'use cache'
   cacheLife('minutes')
   return load(
-    () => client.fetch<PetCard[]>(`*[_type == "pothole" && hasCoordinates == false] | order(street asc, firstReportedAt desc){${CARD}}`),
-    (s) => s.pets.filter((p) => !p.hasCoordinates).sort((a, b) => (a.street ?? '').localeCompare(b.street ?? '') || (b.firstReportedAt ?? '').localeCompare(a.firstReportedAt ?? '')),
+    () => client.fetch<PetCard[]>(`*[_type == "pothole" && !defined(mergedInto) && hasCoordinates == false] | order(street asc, firstReportedAt desc){${CARD}}`),
+    (s) => s.listed!.filter((p) => !p.hasCoordinates).sort((a, b) => (a.street ?? '').localeCompare(b.street ?? '') || (b.firstReportedAt ?? '').localeCompare(a.firstReportedAt ?? '')),
   )
 }
 
@@ -168,8 +173,8 @@ export async function getGhosts(): Promise<Loaded<PetCard[]>> {
   'use cache'
   cacheLife('minutes')
   return load(
-    () => client.fetch<PetCard[]>(`*[_type == "pothole" && outcome == "ghost"] | order(lastEventAt desc){${CARD}}`),
-    (s) => s.pets.filter((p) => p.outcome === 'ghost').sort((a, b) => (b.lastEventAt ?? '').localeCompare(a.lastEventAt ?? '')),
+    () => client.fetch<PetCard[]>(`*[_type == "pothole" && !defined(mergedInto) && outcome == "ghost"] | order(lastEventAt desc){${CARD}}`),
+    (s) => s.listed!.filter((p) => p.outcome === 'ghost').sort((a, b) => (b.lastEventAt ?? '').localeCompare(a.lastEventAt ?? '')),
   )
 }
 
@@ -214,13 +219,13 @@ export async function getMappings(): Promise<Loaded<{mappings: MappingRow[]; unm
     async () => {
       const r = await client.fetch<{mappings: MappingRow[]; unmapped: {name: string; slug: string; phrases: (string | null)[]}[]}>(
         `{"mappings": *[_type == "resolutionMapping"] | order(outcome asc, pattern asc){pattern, outcome, rationale},
-          "unmapped": *[_type == "pothole" && outcome == "unmapped"]{name, "slug": slug.current, "phrases": complaints[]->raw.resolution_description}}`,
+          "unmapped": *[_type == "pothole" && !defined(mergedInto) && outcome == "unmapped"]{name, "slug": slug.current, "phrases": complaints[]->raw.resolution_description}}`,
       )
       return {mappings: r.mappings, unmapped: group(r.unmapped)}
     },
     (s) => ({
       mappings: s.mappings,
-      unmapped: group(s.pets.filter((p) => p.outcome === 'unmapped').map((p) => ({name: p.name, slug: p.slug, phrases: p.complaints.map((c) => c.resolution ?? null)}))),
+      unmapped: group(s.listed!.filter((p) => p.outcome === 'unmapped').map((p) => ({name: p.name, slug: p.slug, phrases: p.complaints.map((c) => c.resolution ?? null)}))),
     }),
   )
 }
@@ -240,7 +245,7 @@ export async function getOffice(): Promise<Loaded<OfficeView>> {
       const r = await client.fetch<{proposedClusters: number; submittedAdoptions: number; latest: {name: string; slug: string; e: {from: string; to: string; at: string; cause: {kind: string}} | null}[]}>(
         `{"proposedClusters": count(*[_type == "clusterDecision" && decision == "proposed"]),
           "submittedAdoptions": count(*[_type == "adoption" && moderation == "submitted"]),
-          "latest": *[_type == "pothole" && defined(events)]{name, "slug": slug.current, "e": events[-1]} | order(e.at desc)[0...25]}`,
+          "latest": *[_type == "pothole" && !defined(mergedInto) && defined(events)]{name, "slug": slug.current, "e": events[-1]} | order(e.at desc)[0...25]}`,
       )
       return {
         proposedClusters: r.proposedClusters,
@@ -251,7 +256,7 @@ export async function getOffice(): Promise<Loaded<OfficeView>> {
     (s) => ({
       proposedClusters: 0,
       submittedAdoptions: 0,
-      recentChanges: s.pets
+      recentChanges: s.listed!
         .flatMap((p) => (p.events.length ? [{name: p.name, slug: p.slug, e: p.events[p.events.length - 1]!}] : []))
         .sort((a, b) => b.e.at.localeCompare(a.e.at))
         .slice(0, 25)

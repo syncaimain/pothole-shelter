@@ -68,6 +68,10 @@ export class MemoryStore implements SyncStore {
       pets: new Map(this.ofType<StoredPet>('pothole').map((p) => [p._id, p])),
       mappings: this.ofType<ResolutionMapping>('resolutionMapping'),
       watermark: lastGood?.watermark,
+      // Same rule as the Sanity store's query: only merges a person ("g…" id) approved.
+      approvedClusters: this.ofType<{_id: string; decision: string; decidedBy?: string; complaints: {_ref: string}[]}>('clusterDecision')
+        .filter((c) => c.decision === 'approved' && typeof c.decidedBy === 'string' && c.decidedBy.startsWith('g'))
+        .map((c) => ({_id: c._id, complaintIds: c.complaints.map((x) => x._ref)})),
     })
   }
 

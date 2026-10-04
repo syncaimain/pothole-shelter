@@ -26,6 +26,7 @@ export const clusterDecision = defineType({
     }),
     defineField({name: 'decidedBy', type: 'string', readOnly: true}),
     defineField({name: 'decidedAt', type: 'datetime', readOnly: true}),
+    defineField({name: 'workflowInstance', title: 'Cluster review workflow instance', type: 'string', readOnly: true}),
   ],
   preview: {
     select: {decision: 'decision', reason: 'reason', by: 'proposedBy'},

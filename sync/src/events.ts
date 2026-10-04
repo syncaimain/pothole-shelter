@@ -10,12 +10,14 @@ import {toIso} from './time.ts'
 export type EventState = Outcome | 'reported'
 
 export interface EventCause {
-  kind: 'complaintChange' | 'timeRule' | 'mappingChange'
+  kind: 'complaintChange' | 'timeRule' | 'mappingChange' | 'clusterMerge'
   complaint?: {_type: 'reference'; _ref: string}
   field?: string
   oldValue?: string
   newValue?: string
   mapping?: {_type: 'reference'; _ref: string; _weak: true}
+  /** The approved clusterDecision behind a clusterMerge. */
+  cluster?: {_type: 'reference'; _ref: string; _weak: true}
 }
 
 /**
@@ -108,6 +110,8 @@ export function transitionEvent(
   changed: readonly {id: string; before: RawRecord; after: RawRecord}[],
   now: Date,
   runId: string,
+  /** Set when an approved cluster merge, not a record change, moved this pet. */
+  mergedBy?: string,
 ): StatusEvent {
   const to = derived.fields.outcome
   const deciding = derived.deciding
@@ -123,6 +127,13 @@ export function transitionEvent(
       oldValue: field ? asText(change.before[field]) : undefined,
       newValue: field ? asText(change.after[field]) : undefined,
       mapping: mappingRef(derived.mapping),
+    }, runId)
+  }
+  if (mergedBy) {
+    return event(petId, from, to, now, {
+      kind: 'clusterMerge',
+      complaint: ref(ids.complaint(deciding.unique_key)),
+      cluster: {_type: 'reference', _ref: mergedBy, _weak: true},
     }, runId)
   }
   const feral = feralAt(deciding)

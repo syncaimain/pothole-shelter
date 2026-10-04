@@ -1,7 +1,7 @@
 import {OUTCOMES} from '@pothole/sync/domain'
 import {useClient, useCurrentUser, useQuery} from '@sanity/sdk-react'
 import {useState, type CSSProperties} from 'react'
-import {decide, type PendingAdoption} from './moderation'
+import {decide, decideCluster, type PendingAdoption, type ProposedCluster} from './moderation'
 
 const PUBLIC_SITE = 'https://pothole-shelter.vercel.app'
 
@@ -89,19 +89,47 @@ function AdoptionQueue() {
 }
 
 function ClusterQueue() {
+  const client = useClient({apiVersion: '2025-02-19'})
   const {data} = useQuery<string>({
     query: `{"count": count(*[_type == "clusterDecision" && decision == "proposed"]),
-      "items": *[_type == "clusterDecision" && decision == "proposed"] | order(count(complaints) desc)[0...10]{_id, reason, distanceMetres, daysApart}}`,
+      "items": *[_type == "clusterDecision" && decision == "proposed"] | order(count(complaints) desc, _id asc)[0...15]{_id, reason, distanceMetres, daysApart, workflowInstance}}`,
   })
-  const d = (data ?? {count: 0, items: []}) as unknown as {count: number; items: {_id: string; reason: string}[]}
+  const d = (data ?? {count: 0, items: []}) as unknown as {count: number; items: ProposedCluster[]}
+  const [busy, setBusy] = useState<string>()
+  const [error, setError] = useState<string>()
+  async function act(item: ProposedCluster, action: 'approve' | 'reject') {
+    setBusy(item._id)
+    setError(undefined)
+    try {
+      await decideCluster(client, item, action)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(undefined)
+    }
+  }
   return (
     <section aria-labelledby="clusters">
       <h2 id="clusters">Cluster review ({d.count})</h2>
-      <p style={{color: '#555', marginTop: 0}}>Merges proposed by the rule. Nothing merges until a person approves.</p>
-      {d.items.map((c) => (
-        <p key={c._id} style={card}>
-          {c.reason}
+      <p style={{color: '#555', marginTop: 0}}>
+        Merges proposed by the rule (60 m, 30 days, same street; strays by same block). Nothing merges until you approve. Note:
+        intersection complaints share one point, so &ldquo;0 m&rdquo; means the same corner, not proof of one pothole.
+      </p>
+      {error && (
+        <p role="alert" style={{color: '#b3261e', fontWeight: 600}}>
+          {error}
         </p>
+      )}
+      {d.items.map((c) => (
+        <article key={c._id} style={card}>
+          <p style={{marginTop: 0}}>{c.reason}</p>
+          <button onClick={() => act(c, 'approve')} disabled={busy === c._id}>
+            Approve merge
+          </button>{' '}
+          <button onClick={() => act(c, 'reject')} disabled={busy === c._id}>
+            Reject
+          </button>
+        </article>
       ))}
       {d.count === 0 && <p>No proposals waiting.</p>}
     </section>

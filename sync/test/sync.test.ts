@@ -231,3 +231,66 @@ describe('paging and outages', () => {
     expect(n).toBe(2)
   })
 })
+
+describe('cluster merges approved by a person', () => {
+  const repaired = () => ROWS.repairedWithCoords!.unique_key // filed 2026-04-07, closed as repaired
+  const open = () => ROWS.shelterOpenRecent!.unique_key // filed 2026-09-28, still open
+  const decision = (decidedBy: string) => ({
+    _id: `clusterDecision-${repaired()}-test`,
+    _type: 'clusterDecision',
+    decision: 'approved',
+    decidedBy,
+    complaints: [{_ref: `complaint311-${repaired()}`}, {_ref: `complaint311-${open()}`}],
+  })
+
+  it('moves every member to the earliest complaint\'s pet and marks the other as merged, keeping its history', async () => {
+    const store = storeWithMappings()
+    await sync(store, allRows)
+    const before = eventsFor(store, open()).length
+    store.docs.set(decision('gStaffMember01')._id, decision('gStaffMember01') as never)
+    const run = await sync(store, () => [], plusDays(T0, 1))
+    expect(run.state).toBe('succeeded')
+
+    const survivor = pet(store, repaired())
+    expect(survivor.complaints.map((c) => c._ref)).toEqual([`complaint311-${repaired()}`, `complaint311-${open()}`])
+    expect(survivor).toMatchObject({complaintCount: 2, temperament: 'sociable'})
+    expect((store.docs.get(`pothole-${open()}`) as unknown as {mergedInto?: string}).mergedInto).toBe(`pothole-${repaired()}`)
+    expect(eventsFor(store, open()).length).toBe(before) // nothing deleted
+  })
+
+  it('records the outcome change a merge causes as a clusterMerge event citing the decision', async () => {
+    const store = storeWithMappings()
+    await sync(store, allRows)
+    expect(pet(store, repaired()).outcome).toBe('adopted')
+    store.docs.set(decision('gStaffMember01')._id, decision('gStaffMember01') as never)
+    await sync(store, () => [], plusDays(T0, 1))
+    // An open member now keeps the merged pet in the shelter.
+    expect(pet(store, repaired()).outcome).toBe('shelter')
+    expect(eventsFor(store, repaired()).at(-1)).toMatchObject({
+      from: 'adopted',
+      to: 'shelter',
+      cause: {kind: 'clusterMerge', cluster: {_ref: decision('g')._id}},
+    })
+  })
+
+  it('ignores a merge "approved" by a robot token', async () => {
+    const store = storeWithMappings()
+    await sync(store, allRows)
+    store.docs.set(decision('p-agentProposer01')._id, decision('p-agentProposer01') as never)
+    const run = await sync(store, () => [], plusDays(T0, 1))
+    expect(run.statusEvents).toBe(0)
+    expect(pet(store, repaired()).complaintCount).toBe(1)
+    expect((store.docs.get(`pothole-${open()}`) as unknown as {mergedInto?: string}).mergedInto).toBeUndefined()
+  })
+
+  it('a second run after a merge changes nothing', async () => {
+    const store = storeWithMappings()
+    await sync(store, allRows)
+    store.docs.set(decision('gStaffMember01')._id, decision('gStaffMember01') as never)
+    await sync(store, () => [], plusDays(T0, 1))
+    const writes = store.writes
+    const again = await sync(store, () => [], plusDays(T0, 1))
+    expect(again.statusEvents).toBe(0)
+    expect(store.writes).toBe(writes)
+  })
+})

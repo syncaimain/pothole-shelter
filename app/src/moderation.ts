@@ -59,3 +59,27 @@ export async function decide(client: SanityClient, item: PendingAdoption, action
   }
   await tx.commit()
 }
+
+export interface ProposedCluster {
+  _id: string
+  reason: string
+  distanceMetres?: number
+  daysApart?: number
+  workflowInstance?: string
+}
+
+/**
+ * A person approves or rejects a proposed merge. The sync merges only decisions whose
+ * decidedBy is a person id, so a robot writing "approved" here would change nothing.
+ */
+export async function decideCluster(client: SanityClient, item: ProposedCluster, action: 'approve' | 'reject'): Promise<void> {
+  if (!item.workflowInstance) throw new Error('This proposal has no cluster-review workflow instance.')
+  const engine = createEngine({client, tag: WORKFLOW_TAG, workflowResource: WORKFLOW_RESOURCE})
+  await engine.fireAction({instanceId: item.workflowInstance, activity: 'review', action, params: {note: ''}})
+  const by = await decidedBy(client, item.workflowInstance)
+  if (!isPersonId(by)) throw new Error('Only a person can decide merges. This session is not signed in as a person.')
+  await client
+    .patch(item._id)
+    .set({decision: action === 'approve' ? 'approved' : 'rejected', decidedBy: by, decidedAt: new Date().toISOString()})
+    .commit()
+}

@@ -26,12 +26,14 @@ export interface BioMeta {
 }
 
 /** Only each event's _key is needed to avoid appending it twice. */
-export type StoredPet = {_id: string; bio?: string; bioMeta?: BioMeta; events?: Pick<StatusEvent, '_key'>[]} & Partial<PetFields>
+export type StoredPet = {_id: string; bio?: string; bioMeta?: BioMeta; events?: Pick<StatusEvent, '_key'>[]; mergedInto?: string} & Partial<PetFields>
 
 export interface SyncState {
   complaints: Map<string, ComplaintDoc>
   pets: Map<string, StoredPet>
   mappings: ResolutionMapping[]
+  /** Cluster decisions a person approved (decidedBy is a person id); the sync merges these. */
+  approvedClusters?: {_id: string; complaintIds: string[]}[]
   /** Socrata :updated_at high-water mark from the last successful run. */
   watermark?: string
 }
@@ -130,24 +132,53 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
     }
   }
 
-  // 2. Which complaints belong to which pet. Existing pets keep their members (that is
-  //    where approved cluster merges live); any complaint not in a pet becomes its own pet.
+  // 2. Which complaints belong to which pet. A cluster a person approved sends all its
+  //    complaints to one survivor: the pet of its earliest complaint. Otherwise existing pets
+  //    keep their members, and any complaint not in a pet becomes its own pet.
+  const survivorOf = new Map<string, {pet: string; decision: string}>()
+  for (const cluster of [...(state.approvedClusters ?? [])].sort((a, b) => a._id.localeCompare(b._id))) {
+    const inSync = cluster.complaintIds.filter((id) => merged.has(id) && !survivorOf.has(id))
+    if (inSync.length < 2) continue
+    const earliest = [...inSync].sort((a, b) => (createdAt(merged.get(a)!.raw)?.getTime() ?? 0) - (createdAt(merged.get(b)!.raw)?.getTime() ?? 0))[0]!
+    const pet = ids.pothole(merged.get(earliest)!.raw.unique_key)
+    for (const id of inSync) survivorOf.set(id, {pet, decision: cluster._id})
+  }
+  const home = (complaintId: string, fallback: string) => survivorOf.get(complaintId)?.pet ?? fallback
+
   const members = new Map<string, string[]>()
+  const add = (pet: string, complaintId: string) => {
+    const list = members.get(pet) ?? []
+    if (!list.includes(complaintId)) list.push(complaintId)
+    members.set(pet, list)
+  }
   const assigned = new Set<string>()
   for (const pet of state.pets.values()) {
-    const refs = (pet.complaints ?? []).map((c) => c._ref).filter((r) => merged.has(r))
-    members.set(pet._id, refs)
-    refs.forEach((r) => assigned.add(r))
+    if (!members.has(pet._id)) members.set(pet._id, [])
+    for (const ref of (pet.complaints ?? []).map((c) => c._ref).filter((r) => merged.has(r))) {
+      add(home(ref, pet._id), ref)
+      assigned.add(ref)
+    }
   }
   for (const c of merged.values()) {
-    if (!assigned.has(c._id)) members.set(ids.pothole(c.raw.unique_key), [c._id])
+    if (!assigned.has(c._id)) add(home(c._id, ids.pothole(c.raw.unique_key)), c._id)
   }
+  const mergeDecisionFor = (petId: string) => [...survivorOf.values()].find((s) => s.pet === petId)?.decision
 
   // 3. Recompute every pet (the 60-day rule needs that even when no record changed).
   const petCreates: PetDoc[] = []
   const petPatches: PetPatch[] = []
   for (const [petId, memberIds] of members) {
-    if (memberIds.length === 0) continue
+    if (memberIds.length === 0) {
+      // Every complaint of this pet went to an approved cluster's survivor. The pet is kept,
+      // with its history, and marked as merged rather than deleted.
+      const stored = state.pets.get(petId)
+      const into = (stored?.complaints ?? []).map((c) => survivorOf.get(c._ref)?.pet).find(Boolean)
+      if (stored && into && stored.mergedInto !== into) {
+        petPatches.push({id: petId, set: {mergedInto: into}, unset: [], append: []})
+        counts.petsUpdated++
+      }
+      continue
+    }
     const complaints = memberIds
       .map((id) => ({id, raw: merged.get(id)!.raw}))
       .sort((a, b) => (createdAt(a.raw)?.getTime() ?? 0) - (createdAt(b.raw)?.getTime() ?? 0))
@@ -186,7 +217,7 @@ export function planSync({state, rows, now, runId}: PlanInput): Plan {
     const append: StatusEvent[] = []
     if (stored.outcome && stored.outcome !== derived.fields.outcome) {
       const petChanges = memberIds.map((id) => changed.get(id)).filter((c) => !!c)
-      const e = transitionEvent(petId, stored.outcome as Outcome, derived, petChanges, now, runId)
+      const e = transitionEvent(petId, stored.outcome as Outcome, derived, petChanges, now, runId, mergeDecisionFor(petId))
       if (!(stored.events ?? []).some((x) => x._key === e._key)) append.push(e)
     }
 

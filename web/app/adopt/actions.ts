@@ -28,7 +28,7 @@ export async function submitAdoption(_prev: AdoptState, form: FormData): Promise
 
   try {
     const client = serverClient()
-    const pet = await client.fetch<{_id: string; outcome: string} | null>(`*[_type == "pothole" && slug.current == $slug][0]{_id, outcome}`, {slug})
+    const pet = await client.fetch<{_id: string; outcome: string} | null>(`*[_type == "pothole" && slug.current == $slug && !defined(mergedInto)][0]{_id, outcome}`, {slug})
     if (!pet) return {status: 'error', errors: {form: 'That pet is not in the shelter.'}, values}
     if (pet.outcome !== 'shelter' && pet.outcome !== 'feral') {
       return {status: 'error', errors: {form: 'This pet has already left the shelter, so it is not taking adoption notes.'}, values}
