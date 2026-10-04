@@ -135,3 +135,27 @@ BLOCKED_ON: Sanity — **creates are rejected with `documentLimitExceededError` 
 **Code:** the sync now appends events in the same patch that changes the outcome. Keys are content hashes, so retries can't duplicate them. New tests assert that zero event documents are written and that a re-run doesn't append twice.
 
 **The sync crashes on quota rather than recording a failed run.** Recording a failure is itself a write, so it can't. It exits non-zero, which a scheduler will notice. I'll leave this alone unless you want a local fallback for failure records.
+
+## 2026-10-04T13:35Z — agent
+STATE: Public site built against existing data and verified on the running server (port 3004): gallery, pet pages, strays, ghosts, sync log, Shelter Office mirror, how-it-works. Committed locally; 4 commits await the push.
+BLOCKED_ON: Sanity quota meter (creates still refused; owner checking Manage). gh `workflow` scope for the push. Neither blocks read-only work.
+
+**Built (web/, Next 16.3.8 with Cache Components)**
+- `/`: totals, Feral of the week (picked by calendar week, labelled as such), gallery filtered by outcome and age (plain GET form, works without JS), 48 per page.
+- `/pothole/[slug]`: bio, temperament, status timeline from the embedded events, complaint history with the city's resolution text verbatim, and a link to each real 311 record (SODA row URL, verified to return the row). Rounded coordinates only.
+- `/strays` (street index + per street; 1 MB → 92 KB), `/ghosts`, `/sync` (run log, unmapped phrases, mapping table with rationales), `/office` (public mirror: queue counts, sync health, lifecycle board, latest changes; never shows unapproved adoption text), `/how-it-works` (schema, workflows status, data source, NYC disclaimer).
+- Stale-data banner from syncRun records: "Data from [time]; last sync failed: [reason]". "Last synced" is in the header on every page.
+
+**Fallback proven:** with live data forced off, every page rendered from `web/data/fallback.json` and showed "Live data is unavailable right now (…). Showing the saved snapshot from …". There is no silent fallback.
+
+**Judge path walked against the server:** gallery → feral pet → real 311 record link → strays → ghosts → sync. All 200s with the expected content.
+
+**Known gaps:**
+- An unknown pet URL renders the not-found page with HTTP 200 (streaming).
+- No embedded map yet.
+- No adoption form (needs creates).
+- No Playwright/axe run yet: installing browsers costs disk, and I'd like your OK given the shared disk budget.
+
+**Needs owner review:** the footer and /how-it-works quote the NYC Open Data disclaimer from a search-indexed copy (the live terms page 404s; see BUILD_LOG §5). It should be confirmed in a browser before the post.
+
+**Next (no creates needed):** the App SDK Shelter Office scaffold (`sanity init --template app-quickstart`; the org ID is now set). Does the Dashboard need enabling for the org, or is that also undocumented? I'll check the docs before asking you.

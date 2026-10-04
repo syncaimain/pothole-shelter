@@ -7,9 +7,11 @@
     "dev": "next dev --port 3004",
     "build": "next build",
     "start": "next start --port 3004",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "export:fallback": "node scripts/export-fallback.ts"
   },
   "dependencies": {
+    "@pothole/sync": "workspace:*",
     "@sanity/client": "^8.9.0",
     "next": "16.3.8",
     "react": "^19.2.2",

@@ -371,3 +371,76 @@ asserts the specific "action filter returned false" error, so it can't pass for 
   "within 0 m" means "the same corner", not proof of one pothole. A reviewer must know this; the post should say it.
 - Single linkage chains: no distance group spreads past 60 m, but time spans chain up to 99 days through 30-day links.
   The reason text reports the true spread and span, and a person decides.
+
+---
+
+## 2026-10-04 — Session 4: over the document cap, events folded into pets, the public site
+
+### We were over the cap, and the design caused it
+
+The coordinator measured the dataset: **10,022 documents against a 10,000 cap**, with one `statusEvent` document per
+outcome change making up 4,992 of them. I had modelled events as documents because the spec lists `statusEvent` as a
+type. That was a schema decision I made without counting first. Fix (owner-approved): events become an append-only
+array **inside each pothole**. The sync appends in the same patch that changes the outcome, so the two can't disagree,
+and each entry's `_key` is a content hash, so a retry can't append twice.
+
+### Migration: move, don't re-derive
+
+`ingest/migrate_events_to_array.ts` copies each existing event verbatim. Its new `_key` is the hash that ended its old
+document ID, checked against the sync's `eventKey()` (4,992/4,992), so future appends dedupe against migrated events.
+It runs as dry run → `--apply` (append + verify) → `--apply --delete` (only after every event is verified inside its pet).
+**Before:** 10,022 documents. **After:** 5,030, with 0 statusEvent documents and 4,992 array entries across 2,503 pets.
+
+### The mistake worth writing up: "nothing was written" was false
+
+The owner interrupted my first `--apply` mid-call, and the tool reported the call as rejected. I told the owner nothing had
+been appended. Later, `--apply` reported "0 pets need appending": the interrupted run *had* written every array
+(timestamps 07:03:47–07:04:12Z). It deleted nothing, and it was exactly the intended step, but my statement was wrong.
+**Lesson:** a tool call that surfaces as rejected may still have executed. Check the state of the data before saying what
+didn't happen. I corrected it in REPORT the moment I found it.
+
+### Then Sanity locked creates anyway
+
+At 5,030 documents, every create still failed with `documentLimitExceededError: "Documents quota limit reached"`.
+Deletes worked. The most likely cause is a usage meter that hadn't recomputed since we were over. The sync can't even record
+its failure, because a failed `syncRun` is a write too. It exits non-zero instead. No retry loop; the owner is checking Manage.
+
+### Workflows dry run: the gate that wasn't there
+
+The guidance (F17) said Workflows needed org-level enablement. Six doc pages, the section index, the release post and the
+installed CLI say nothing of the kind. The early-access page had moved to `/docs/workflows/prerelease`, which explains
+the 404 the owner hit. The empirical test, `sanity-workflows deploy --dry-run`:
+- no login session: "Authentication required";
+- the project-scoped Deploy Studio token: reached the diff, then "project user not found for user ID g-…" (identity, not a gate);
+- the Editor robot token: **"✔ Diffed 3 definition(s) · production (prod) → fixjy07h.production"**, exit 0.
+F17 was withdrawn. The real constraint is token scope (F38): the docs say a project-scoped token deploys and later fails
+on cross-resource reads, so the real deploy will use `sanity login`.
+
+### The public site, built only on reads
+
+- **Next 16 isn't the Next in the model's memory.** The package ships `AGENTS.md` ("This is NOT the Next.js you know")
+  and its own docs. Caching is now `cacheComponents` + `'use cache'` + `cacheLife`, and `params` / `searchParams` are
+  promises that must be read inside `<Suspense>`. I read the bundled docs before writing a page.
+- **First build failed:** `Route "/": Next.js encountered the unstable value Date.now() while prerendering`. That was
+  "Feral of the week", which picks a pet by calendar week. Fix (the docs' `[cache]` option): read the clock inside the
+  cached data function, never in the page.
+- **Data layer** (`web/lib/data.ts`): public CDN, no token. Every query has a snapshot twin that answers from
+  `web/data/fallback.json` (exported read-only: 2,503 pets, 3.9 MB) if Sanity fails. Each page then shows "Live data is
+  unavailable right now (reason). Showing the saved snapshot from (time)". **Proven, not assumed:** a build with live data
+  forced off (`SHELTER_FORCE_SNAPSHOT=1`) renders every page from the snapshot, with the notice on each.
+- **Judge path checked against the running server:** gallery (2,503 pets, filters by outcome and age via a plain GET
+  form) → Feral of the week (Churro Gully, 927 days) → pet page (bio, timeline, complaint history) → "View the real 311
+  record" returns the actual SODA row. The timeline's "11:06 AM EDT" matches the record's floating `created_date`
+  of 11:06, so the time zones are right.
+- **/strays was 1 MB** with 1,552 strays rendered in full. It's now a street index plus a per-street view: **92 KB**.
+- The site never shows house numbers. Coordinates are rounded to 3 decimals, and street names only come from street fields.
+- A false claim was caught before shipping: "/how-it-works" said stages were "enforced in server code". They aren't yet,
+  so it now says exactly what is real.
+
+### Known gaps (not hidden)
+
+- Unknown pet URLs render the not-found page **with HTTP 200**: streaming sends the status before `notFound()` runs.
+- No embedded map yet (pet pages link to OpenStreetMap at rounded coordinates); the spec wants a map with a list alternative.
+- No adoption form yet. It needs creates, which are blocked.
+- No Playwright/axe run yet. The site uses semantic HTML, a skip link, visible focus and works without JavaScript,
+  but that is not the same as a measured zero-violation result.
