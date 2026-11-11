@@ -1,0 +1,15 @@
+{
+  "runId": "syncRun-20261111T220043Z-5ae8b6",
+  "mode": "incremental",
+  "where": "complaint_type='Street Condition' AND descriptor='Pothole' AND borough='QUEENS' AND community_board='13 QUEENS' AND :updated_at >= '2026-11-11T02:40:10.425Z'",
+  "dataset": "erm2-nwe9",
+  "pages": [
+    {
+      "_key": "p1",
+      "file": "syncRun-20261111T220043Z-5ae8b6/page-0001.json",
+      "sha256": "ee60b8b4b26b8b9b638a9247ead800d707799a47a206bb69d695df893e9e89c3",
+      "rows": 7,
+      "retrievedAt": "2026-11-11T22:00:46.927Z"
+    }
+  ]
+}
